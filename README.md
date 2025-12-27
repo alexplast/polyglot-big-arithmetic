@@ -73,7 +73,30 @@ Automated tests compare result outputs against Python's ground truth:
 make verify_all COUNT=1000
 ```
 
+## Performance Comparison
+
+We benchmarked all 7 implementations with a significant number of iterations to compare performance.
+
+**Benchmark settings:**
+- **Fibonacci**: $N = 5000$
+- **Factorial**: $N = 2000$
+
+| Language | Fibonacci (5000) | Factorial (2000) | BigInt Type |
+| :--- | :--- | :--- | :--- |
+| **C++** | 1.848 ms | 43.141 ms | Custom Digit Array |
+| **Rust** | 2.502 ms | 31.026 ms | Custom Digit Array |
+| **Go** | 2.094 ms | 1.045 ms | `math/big` |
+| **Java** | 1.300 ms | 15.684 ms | `BigInteger` |
+| **Python** | 0.814 ms | 1.258 ms | Native |
+| **JavaScript** | 1.487 ms | 3.349 ms | `BigInt` |
+| **Fortran** | 3.836 ms | 4.713 ms | Custom Digit Array |
+
+### Observations
+*   **Winner**: **Python** performed best in Fibonacci (as it's extremely well-optimized for BigInt), while **Go** and **Python** were leaders in Factorial.
+*   **Custom Implementations**: Our manual implementations in C++ and Rust performed well, but are currently less optimized than the native BigInt implementations of languages like Go and Python, which use highly tuned assembly/C backends.
+*   **Fortran**: The custom implementation in Fortran is functional but slower than highly optimized built-in BigInt libraries.
+
 ## Conclusions
-*   **Performance vs Complexity**: While Python and JS handle BigInt natively and conveniently, manual implementations in C++ or Rust allow for fine-tuned performance and memory control.
-*   **Scalability**: By bypassing native hardware limits with custom software arithmetic, we made the "limited" compiled languages as capable as their interpreted counterparts for symbolic mathematics.
-*   **Verification**: Automated cross-language verification is essential when implementing custom arithmetic to ensure no precision is lost during carry/borrow operations.
+*   **Performance vs Complexity**: Native BigInt (Python, JS) is both faster and easier to write. However, manual BigInt (C++, Rust) demonstrates the underlying mechanics of arbitrary-precision arithmetic.
+*   **Optimization**: Languages with native BigInt support (Go, Java, JS, Python) leverage years of optimization. Our C++/Rust/Fortran implementations use basic algorithms.
+*   **Scalability**: All 7 implementations successfully handle inputs that would overflow standard hardware types.

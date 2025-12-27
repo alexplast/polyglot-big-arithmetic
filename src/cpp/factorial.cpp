@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <cstdlib>
+#include <chrono>
 
 struct BigInt {
     std::vector<int> digits; // stored in reverse order (0-indexed is 10^0)
@@ -46,11 +47,15 @@ int main() {
     }
 
     BigInt factorial(1);
+    auto start = std::chrono::high_resolution_clock::now();
     for (int i = 2; i <= count; ++i) {
         factorial.multiply(i);
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
     std::cout << "Result(" << count << "!): " << factorial.toString() << std::endl;
+    std::cout << "Time: " << duration.count() / 1000.0 << " ms" << std::endl;
 
     return 0;
 }

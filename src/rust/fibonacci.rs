@@ -1,4 +1,5 @@
 use std::env;
+use std::time::Instant;
 
 struct BigInt {
     digits: Vec<u32>,
@@ -51,10 +52,13 @@ fn main() {
     let mut a = BigInt::new(0);
     let mut b = BigInt::new(1);
 
+    let start = Instant::now();
     for _ in 0..count {
         let temp = BigInt { digits: a.digits.clone() };
         a = BigInt { digits: b.digits.clone() };
         b.add(&temp);
     }
+    let duration = start.elapsed();
     println!("Result(F_{}): {}", count, a.to_string());
+    println!("Time: {:.3} ms", duration.as_micros() as f64 / 1000.0);
 }

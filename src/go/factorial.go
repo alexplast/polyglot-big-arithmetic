@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"os"
 	"strconv"
+	"time"
 )
 
 func main() {
@@ -20,9 +21,12 @@ func main() {
 	
 	fact := big.NewInt(1)
 
+	start := time.Now()
 	for i := 1; i <= count; i++ {
 		bigI := big.NewInt(int64(i))
 		fact.Mul(fact, bigI)
 	}
+	elapsed := time.Since(start)
 	fmt.Printf("Result(%d!): %s\n", count, fact.String())
+	fmt.Printf("Time: %.3f ms\n", float64(elapsed.Microseconds())/1000.0)
 }

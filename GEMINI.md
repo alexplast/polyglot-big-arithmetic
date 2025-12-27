@@ -24,4 +24,5 @@ A comparative implementation of Fibonacci and Factorial algorithms across 7 lang
 
 *   **Custom BigInt**: Implemented in C++, Rust, and Fortran to handle values exceeding 128-bit capacity.
 *   **Arbitrary Precision**: Go (`math/big`), Java (`BigInteger`), JS (`BigInt`), and Python (native) are used where available.
-*   **Standardized Output**: All programs output results in `Result(...): <value>` format for easy parsing and verification.
+*   **Performance Measurement**: All implementations now include execution time measurement (in milliseconds) for the core calculation loop.
+*   **Standardized Output**: All programs output results in `Result(...): <value>` format and `Time: <val> ms` format.

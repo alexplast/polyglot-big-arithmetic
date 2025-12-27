@@ -3,6 +3,7 @@ program factorial
     integer, allocatable :: digits(:), temp_digits(:)
     integer :: i, j, count, stat_val, n_digits, max_digits
     integer(kind=8) :: carry, current
+    integer(kind=8) :: start_time, end_time, clock_rate
     character(len=100) :: count_env
 
     call get_environment_variable("COUNT", count_env, status=stat_val)
@@ -18,6 +19,7 @@ program factorial
     digits(1) = 1
     n_digits = 1
 
+    call system_clock(start_time, clock_rate)
     do i = 2, count
         carry = 0
         do j = 1, n_digits
@@ -39,11 +41,13 @@ program factorial
             carry = carry / 10
         end do
     end do
+    call system_clock(end_time)
 
     write(*, '("Result(", I0, "!): ")', advance='no') count
     do j = n_digits, 1, -1
         write(*, '(I1)', advance='no') digits(j)
     end do
     print *
+    print '("Time: ", F0.3, " ms")', real(end_time - start_time) * 1000.0 / real(clock_rate)
 
 end program factorial

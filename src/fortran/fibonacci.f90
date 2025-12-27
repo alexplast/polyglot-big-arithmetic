@@ -3,6 +3,7 @@ program fibonacci
     integer, allocatable :: digits_a(:), digits_b(:), temp(:), temp_resize(:)
     integer :: i, j, count, stat_val, n_a, n_b, n_temp, max_digits
     integer :: carry, sum_val
+    integer(kind=8) :: start_time, end_time, clock_rate
     character(len=100) :: count_env
 
     call get_environment_variable("COUNT", count_env, status=stat_val)
@@ -24,6 +25,7 @@ program fibonacci
     n_a = 1
     n_b = 1
 
+    call system_clock(start_time, clock_rate)
     do i = 1, count
         if (max(n_a, n_b) + 1 > max_digits) then
              allocate(temp_resize(max_digits * 2))
@@ -53,12 +55,14 @@ program fibonacci
             digits_b(n_b) = carry
         end if
     end do
+    call system_clock(end_time)
 
     write(*, '("Result(F_", I0, "): ")', advance='no') count
     do j = n_a, 1, -1
         write(*, '(I1)', advance='no') digits_a(j)
     end do
     print *
+    print '("Time: ", F0.3, " ms")', real(end_time - start_time) * 1000.0 / real(clock_rate)
 
     deallocate(digits_a)
     deallocate(digits_b)

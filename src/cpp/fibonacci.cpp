@@ -3,6 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <cstdlib>
+#include <chrono>
 
 struct BigInt {
     std::vector<int> digits;
@@ -53,12 +54,17 @@ int main() {
     BigInt a(0);
     BigInt b(1);
 
+    auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < n; i++) {
         BigInt temp = a;
         a = b;
         b.add(temp);
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
     std::cout << "Result(F_" << n << "): " << a.toString() << std::endl;
+    std::cout << "Time: " << duration.count() / 1000.0 << " ms" << std::endl;
 
     return 0;
 }
