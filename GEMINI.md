@@ -1,44 +1,27 @@
 # Project Overview
 
-This project contains implementations of the Fibonacci sequence in multiple programming languages: C++, Go, Rust, Java, Fortran, Python, and JavaScript. It serves as a comparative showcase of how the same algorithm is expressed in different languages.
+A comparative implementation of Fibonacci and Factorial algorithms across 7 languages (C++, Go, Rust, Java, Fortran, Python, JS). 
 
-**Project Structure:**
-*   `src/`: Contains source code for each language in its own subdirectory (`src/cpp`, `src/go`, etc.).
-*   `bin/`: Destination for compiled executables.
+**Key Feature**: All implementations support **Arbitrary Precision** (BigInt). Compiled languages (C++, Rust, Fortran) use a custom digit-array implementation to bypass native bit-width limits.
 
-Each implementation is a standalone program that calculates and prints a specified number of Fibonacci numbers. The number of elements to generate is controlled by the `COUNT` environment variable.
+# Directory Structure
+
+*   `src/`: Source code by language.
+*   `bin/fibo/`: Fibonacci executables.
+*   `bin/fact/`: Factorial executables.
+*   `tests/`: Python-based ground-truth verification.
 
 # Building and Running
 
-A `Makefile` is provided to streamline the build, run, and clean processes for all language implementations.
+*   `make fibo`: Build only Fibonacci.
+*   `make fact`: Build only Factorial.
+*   `make all`: Build everything.
+*   `make run COUNT=N`: Run all Fibonacci programs up to N.
+*   `make run_factorial COUNT=N`: Run all Factorial programs up to N.
+*   `make verify_all COUNT=N`: Verify correctness of all 14 programs (7 fibo + 7 fact).
 
-## Key Commands
+# Implementation Notes
 
-*   **Build all compiled programs:**
-    ```bash
-    make all
-    ```
-    This command compiles the source files from `src/` and places executables in the `bin/` directory.
-
-*   **Run all implementations:**
-    ```bash
-    make run
-    ```
-    This will execute all seven programs. Executables are run from `bin/`, and interpreted scripts (Python, JS) are run from `src/`. You can specify the number of Fibonacci elements by setting the `COUNT` variable:
-    ```bash
-    make run COUNT=20
-    ```
-
-*   **Clean up compiled files:**
-    ```bash
-    make clean
-    ```
-    This command removes the `bin/` directory and all generated artifacts.
-
-# Development Conventions
-
-*   **Configuration:** All programs read the `COUNT` environment variable to determine how many Fibonacci numbers to generate. If `COUNT` is not set, it defaults to `10`.
-*   **Output:** Each program prints the Fibonacci sequence to standard output, followed by a newline.
-*   **Large Number Support:**
-    *   Implementations in Python, Rust, Go, Java, and JavaScript use arbitrary-precision integers (`BigInt`) to correctly handle very large numbers in the sequence.
-    *   The C++ and Fortran versions use `unsigned long long` and `integer(kind=8)` respectively. They include checks to detect and report an error if an integer overflow occurs.
+*   **Custom BigInt**: Implemented in C++, Rust, and Fortran to handle values exceeding 128-bit capacity.
+*   **Arbitrary Precision**: Go (`math/big`), Java (`BigInteger`), JS (`BigInt`), and Python (native) are used where available.
+*   **Standardized Output**: All programs output results in `Result(...): <value>` format for easy parsing and verification.
