@@ -4,38 +4,43 @@
 #include <string>
 #include <cstdlib>
 #include <chrono>
+#include <iomanip>
 
+// Optimized BigInt using Base 10^9
 struct BigInt {
-    std::vector<int> digits; // stored in reverse order (0-indexed is 10^0)
+    static const int BASE = 1000000000;
+    std::vector<int> digits; 
 
     BigInt(long long n) {
         if (n == 0) digits.push_back(0);
         while (n > 0) {
-            digits.push_back(n % 10);
-            n /= 10;
+            digits.push_back(n % BASE);
+            n /= BASE;
         }
     }
 
     void multiply(int n) {
-        int carry = 0;
+        long long carry = 0;
         for (size_t i = 0; i < digits.size(); ++i) {
             long long current = (long long)digits[i] * n + carry;
-            digits[i] = current % 10;
-            carry = current / 10;
+            digits[i] = current % BASE;
+            carry = current / BASE;
         }
         while (carry) {
-            digits.push_back(carry % 10);
-            carry /= 10;
+            digits.push_back(carry % BASE);
+            carry /= BASE;
         }
     }
 
-    std::string toString() const {
-        if (digits.empty()) return "0";
-        std::string s = "";
-        for (int i = digits.size() - 1; i >= 0; --i) {
-            s += (char)('0' + digits[i]);
+    void print() const {
+        if (digits.empty()) {
+            std::cout << "0";
+            return;
         }
-        return s;
+        std::cout << digits.back();
+        for (int i = digits.size() - 2; i >= 0; --i) {
+            std::cout << std::setfill('0') << std::setw(9) << digits[i];
+        }
     }
 };
 
@@ -54,7 +59,9 @@ int main() {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    std::cout << "Result(" << count << "!): " << factorial.toString() << std::endl;
+    std::cout << "Result(" << count << "!): ";
+    factorial.print();
+    std::cout << std::endl;
     std::cout << "Time: " << duration.count() / 1000.0 << " ms" << std::endl;
 
     return 0;

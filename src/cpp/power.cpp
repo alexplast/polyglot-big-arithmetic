@@ -4,49 +4,59 @@
 #include <string>
 #include <cstdlib>
 #include <chrono>
+#include <iomanip>
 
+// Optimized BigInt using Base 10^9
 struct BigInt {
-    std::vector<int> digits; // stored in reverse order (0-indexed is 10^0)
+    static const int BASE = 1000000000;
+    std::vector<int> digits;
 
     BigInt(long long n = 1) {
         if (n == 0) digits.push_back(0);
         while (n > 0) {
-            digits.push_back(n % 10);
-            n /= 10;
+            digits.push_back(n % BASE);
+            n /= BASE;
         }
     }
 
     // Multiply by another BigInt
     BigInt multiply(const BigInt& other) const {
-        std::vector<int> result(digits.size() + other.digits.size(), 0);
+        if (digits.empty() || other.digits.empty()) return BigInt(0);
+        
+        std::vector<long long> result(digits.size() + other.digits.size(), 0);
         
         for (size_t i = 0; i < digits.size(); ++i) {
-            int carry = 0;
+            long long carry = 0;
             for (size_t j = 0; j < other.digits.size() || carry; ++j) {
-                int d2 = j < other.digits.size() ? other.digits[j] : 0;
+                long long d2 = j < other.digits.size() ? other.digits[j] : 0;
                 long long current = result[i + j] + (long long)digits[i] * d2 + carry;
-                result[i + j] = current % 10;
-                carry = current / 10;
+                result[i + j] = current % BASE;
+                carry = current / BASE;
             }
         }
         
-        // Remove leading zeros
+        // Remove leading zeros and convert back to int vector
         while (result.size() > 1 && result.back() == 0) {
             result.pop_back();
         }
         
         BigInt res;
-        res.digits = result;
+        res.digits.resize(result.size());
+        for(size_t i=0; i<result.size(); ++i) {
+            res.digits[i] = (int)result[i];
+        }
         return res;
     }
 
-    std::string toString() const {
-        if (digits.empty()) return "0";
-        std::string s = "";
-        for (int i = digits.size() - 1; i >= 0; --i) {
-            s += (char)('0' + digits[i]);
+    void print() const {
+        if (digits.empty()) {
+            std::cout << "0";
+            return;
         }
-        return s;
+        std::cout << digits.back();
+        for (int i = digits.size() - 2; i >= 0; --i) {
+            std::cout << std::setfill('0') << std::setw(9) << digits[i];
+        }
     }
 };
 
@@ -86,7 +96,9 @@ int main() {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    std::cout << "Result(" << base << "^" << exp << "): " << result.toString() << std::endl;
+    std::cout << "Result(" << base << "^" << exp << "): ";
+    result.print();
+    std::cout << std::endl;
     std::cout << "Time: " << duration.count() / 1000.0 << " ms" << std::endl;
 
     return 0;

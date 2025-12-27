@@ -1,8 +1,10 @@
 use std::env;
 use std::time::Instant;
 
+const BASE: u64 = 1_000_000_000;
+
 struct BigInt {
-    digits: Vec<u32>,
+    digits: Vec<u64>,
 }
 
 impl BigInt {
@@ -12,14 +14,14 @@ impl BigInt {
             digits.push(0);
         }
         while n > 0 {
-            digits.push((n % 10) as u32);
-            n /= 10;
+            digits.push(n % BASE);
+            n /= BASE;
         }
         BigInt { digits }
     }
 
     fn add(&mut self, other: &BigInt) {
-        let mut carry = 0u32;
+        let mut carry = 0u64;
         let n = self.digits.len().max(other.digits.len());
         for i in 0..n {
             if i == self.digits.len() {
@@ -27,16 +29,23 @@ impl BigInt {
             }
             let d2 = if i < other.digits.len() { other.digits[i] } else { 0 };
             let sum = self.digits[i] + d2 + carry;
-            self.digits[i] = sum % 10;
-            carry = sum / 10;
+            self.digits[i] = sum % BASE;
+            carry = sum / BASE;
         }
         if carry > 0 {
             self.digits.push(carry);
         }
     }
 
-    fn to_string(&self) -> String {
-        self.digits.iter().rev().map(|d| d.to_string()).collect()
+    fn print(&self) {
+        if self.digits.is_empty() {
+            print!("0");
+            return;
+        }
+        print!("{}", self.digits.last().unwrap());
+        for d in self.digits.iter().rev().skip(1) {
+            print!("{:09}", d);
+        }
     }
 }
 
@@ -59,6 +68,9 @@ fn main() {
         b.add(&temp);
     }
     let duration = start.elapsed();
-    println!("Result(F_{}): {}", count, a.to_string());
+    
+    print!("Result(F_{}): ", count);
+    a.print();
+    println!();
     println!("Time: {:.3} ms", duration.as_micros() as f64 / 1000.0);
 }
