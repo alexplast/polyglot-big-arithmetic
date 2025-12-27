@@ -1,31 +1,64 @@
 #include <iostream>
-#include <cstdlib> // For getenv
-#include <string>  // For stoll
-#include <limits>  // For numeric_limits
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cstdlib>
+
+struct BigInt {
+    std::vector<int> digits;
+
+    BigInt(long long n = 0) {
+        if (n == 0) digits.push_back(0);
+        while (n > 0) {
+            digits.push_back(n % 10);
+            n /= 10;
+        }
+    }
+
+    void add(const BigInt& other) {
+        int carry = 0;
+        size_t n = std::max(digits.size(), other.digits.size());
+        for (size_t i = 0; i < n || carry; ++i) {
+            if (i == digits.size()) digits.push_back(0);
+            int d2 = i < other.digits.size() ? other.digits[i] : 0;
+            int sum = digits[i] + d2 + carry;
+            digits[i] = sum % 10;
+            carry = sum / 10;
+        }
+    }
+
+    std::string toString() const {
+        if (digits.empty()) return "0";
+        std::string s = "";
+        for (int i = digits.size() - 1; i >= 0; --i) {
+            s += (char)('0' + digits[i]);
+        }
+        return s;
+    }
+};
 
 int main() {
-    int n = 10; // Default value for count
-    const char* count_str = std::getenv("COUNT");
-    if (count_str) {
-        try {
-            n = std::stoi(count_str);
-        } catch (const std::exception& e) {
-            std::cerr << "Error converting COUNT environment variable: " << e.what() << std::endl;
-        }
+    const char* count_env = std::getenv("COUNT");
+    int n = 10;
+    if (count_env) {
+        n = std::atoi(count_env);
     }
 
-    unsigned long long a = 0, b = 1;
-    std::cout << "Fibonacci Sequence (first " << n << " numbers):" << std::endl;
-    for (int i = 0; i < n; i++) {
-        if (a > std::numeric_limits<unsigned long long>::max() - b) {
-            std::cerr << "\nError: Fibonacci sequence exceeds the unsigned long long limit." << std::endl;
-            return 1;
-        }
-        std::cout << a << " ";
-        unsigned long long temp = a;
-        a = b;
-        b = temp + b;
+    if (n < 0) return 0;
+    if (n == 0) {
+        std::cout << "Result(F_0): 0" << std::endl;
+        return 0;
     }
-    std::cout << std::endl; // New line after sequence
+
+    BigInt a(0);
+    BigInt b(1);
+
+    for (int i = 0; i < n; i++) {
+        BigInt temp = a;
+        a = b;
+        b.add(temp);
+    }
+    std::cout << "Result(F_" << n << "): " << a.toString() << std::endl;
+
     return 0;
 }

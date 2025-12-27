@@ -2,26 +2,23 @@ import java.math.BigInteger;
 
 public class Fibonacci {
     public static void main(String[] args) {
-        int n = 10; // Default value
-        String countStr = System.getenv("COUNT");
-        if (countStr != null) {
+        String countEnv = System.getenv("COUNT");
+        int count = 10;
+        if (countEnv != null) {
             try {
-                n = Integer.parseInt(countStr);
+                count = Integer.parseInt(countEnv);
             } catch (NumberFormatException e) {
-                System.err.println("Error converting COUNT environment variable: " + e.getMessage());
             }
         }
 
-        System.out.println("Fibonacci Sequence (first " + n + " numbers):");
-
         BigInteger a = BigInteger.ZERO;
         BigInteger b = BigInteger.ONE;
-        for (int i = 0; i < n; i++) {
-            System.out.print(a + " ");
+
+        for (int i = 0; i < count; i++) {
             BigInteger temp = a;
             a = b;
-            b = temp.add(b);
+            b = b.add(temp);
         }
-        System.out.println();
+        System.out.println("Result(F_" + count + "): " + a);
     }
 }

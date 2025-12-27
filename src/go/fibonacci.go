@@ -8,27 +8,20 @@ import (
 )
 
 func main() {
-	n := 10 // Default value
+	n := 10
 	countStr := os.Getenv("COUNT")
 	if countStr != "" {
-		parsedCount, err := strconv.Atoi(countStr)
-		if err == nil {
-			n = parsedCount
-		} else {
-			fmt.Printf("Error converting COUNT environment variable: %v\n", err)
+		if val, err := strconv.Atoi(countStr); err == nil {
+			n = val
 		}
 	}
-
-	fmt.Printf("Fibonacci Sequence (first %d numbers):\n", n)
 
 	a := big.NewInt(0)
 	b := big.NewInt(1)
 	for i := 0; i < n; i++ {
-		fmt.Printf("%d ", a)
-		temp := new(big.Int)
-		temp.Set(a)
+		temp := new(big.Int).Set(a)
 		a.Set(b)
 		b.Add(temp, b)
 	}
-	fmt.Println()
+	fmt.Printf("Result(F_%d): %d\n", n, a)
 }

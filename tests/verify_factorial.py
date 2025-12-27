@@ -30,11 +30,11 @@ def verify():
     true_val = str(calculate_factorial(count))
     
     languages = [
-        {"name": "C++", "cmd": "./bin/factorial_cpp", "is_fixed": False},
-        {"name": "Go", "cmd": "./bin/factorial_go", "is_fixed": False},
-        {"name": "Rust", "cmd": "./bin/factorial_rs", "is_fixed": False},
-        {"name": "Java", "cmd": "java -cp bin Factorial", "is_fixed": False},
-        {"name": "Fortran", "cmd": "./bin/factorial_f90", "is_fixed": False},
+        {"name": "C++", "cmd": "./bin/fact/factorial_cpp", "is_fixed": False},
+        {"name": "Go", "cmd": "./bin/fact/factorial_go", "is_fixed": False},
+        {"name": "Rust", "cmd": "./bin/fact/factorial_rs", "is_fixed": False},
+        {"name": "Java", "cmd": "java -cp bin/fact Factorial", "is_fixed": False},
+        {"name": "Fortran", "cmd": "./bin/fact/factorial_f90", "is_fixed": False},
         {"name": "Python", "cmd": "python3 src/python/factorial.py", "is_fixed": False},
         {"name": "JavaScript", "cmd": "node src/js/factorial.js", "is_fixed": False},
     ]

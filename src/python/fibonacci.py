@@ -1,11 +1,24 @@
 import os
+import sys
 
-def fibonacci(n):
+# Increase limit for integer to string conversion
+if hasattr(sys, 'set_int_max_str_digits'):
+    sys.set_int_max_str_digits(1000000)
+
+def main():
+    try:
+        count = int(os.environ.get("COUNT", 10))
+    except (ValueError, TypeError):
+        count = 10
+
+    if count < 0:
+        return
+
     a, b = 0, 1
-    for i in range(n):
-        print(a, end=" ")
+    for _ in range(count):
         a, b = b, a + b
+    
+    print(f"Result(F_{count}): {a}")
 
-count = int(os.getenv("COUNT", 10))
-print(f"Fibonacci Sequence (first {count} numbers):")
-fibonacci(count)
+if __name__ == "__main__":
+    main()
