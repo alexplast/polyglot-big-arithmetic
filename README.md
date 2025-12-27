@@ -1,4 +1,4 @@
-# Fibonacci & Factorial: A Multilanguage Comparative Study
+# Polyglot Big Arithmetic
 
 This project explores the implementation of fundamental mathematical algorithms (Fibonacci Sequence and Factorial) across 7 different programming languages: **C++, Go, Rust, Java, Fortran, Python, and JavaScript**.
 
