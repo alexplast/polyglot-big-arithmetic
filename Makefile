@@ -1,4 +1,4 @@
-# Makefile for compiling Fibonacci applications
+# Makefile for compiling Fibonacci and Factorial applications
 
 COUNT ?= 10
 
@@ -9,49 +9,70 @@ bin_dir:
 	@mkdir -p bin
 
 # C++
-cpp: src/cpp/fibonacci.cpp
+cpp: src/cpp/fibonacci.cpp src/cpp/factorial.cpp
 	-g++ src/cpp/fibonacci.cpp -o bin/fibonacci_cpp
+	-g++ src/cpp/factorial.cpp -o bin/factorial_cpp
 
 # Go
-go: src/go/fibonacci.go
+go: src/go/fibonacci.go src/go/factorial.go
 	-go build -o bin/fibonacci_go src/go/fibonacci.go
+	-go build -o bin/factorial_go src/go/factorial.go
 
 # Rust
-rust: src/rust/fibonacci.rs
+rust: src/rust/fibonacci.rs src/rust/factorial.rs
 	-rustc src/rust/fibonacci.rs -o bin/fibonacci_rs
+	-rustc src/rust/factorial.rs -o bin/factorial_rs
 
 # Java
-java: src/java/Fibonacci.java
+java: src/java/Fibonacci.java src/java/Factorial.java
 	-javac -d bin src/java/Fibonacci.java
+	-javac -d bin src/java/Factorial.java
 
 # Fortran
-fortran: src/fortran/fibonacci.f90
+fortran: src/fortran/fibonacci.f90 src/fortran/factorial.f90
 	-gfortran src/fortran/fibonacci.f90 -o bin/fibonacci_f90
+	-gfortran src/fortran/factorial.f90 -o bin/factorial_f90
 
-# Phony targets for interpreted languages
+# Phony targets
 .PHONY: python js
 python:
-	@echo "Python is an interpreted language, no compilation needed."
+	@echo "Python is interpreted."
 
 js:
-	@echo "JavaScript (Node.js) is interpreted, no compilation needed."
+	@echo "JavaScript is interpreted."
 
-# Run all applications
+# Run Fibonacci
 run: all
-	@echo "Running C++ Fibonacci:"
-	-@time env COUNT=$(COUNT) ./bin/fibonacci_cpp
-	@echo "\nRunning Go Fibonacci:"
-	-@time env COUNT=$(COUNT) ./bin/fibonacci_go
-	@echo "\nRunning Rust Fibonacci:"
-	-@time env COUNT=$(COUNT) ./bin/fibonacci_rs
-	@echo "\nRunning Java Fibonacci:"
-	-@time env COUNT=$(COUNT) java -cp bin Fibonacci
-	@echo "\nRunning Fortran Fibonacci:"
-	-@time env COUNT=$(COUNT) ./bin/fibonacci_f90
-	@echo "\nRunning Python Fibonacci:"
-	-@time env COUNT=$(COUNT) python3 src/python/fibonacci.py
-	@echo "\nRunning JavaScript Fibonacci:"
-	-@time env COUNT=$(COUNT) node src/js/fibonacci.js
+	@echo "--- Fibonacci (COUNT=$(COUNT)) ---"
+	-@env COUNT=$(COUNT) ./bin/fibonacci_cpp
+	-@env COUNT=$(COUNT) ./bin/fibonacci_go
+	-@env COUNT=$(COUNT) ./bin/fibonacci_rs
+	-@env COUNT=$(COUNT) java -cp bin Fibonacci
+	-@env COUNT=$(COUNT) ./bin/fibonacci_f90
+	-@env COUNT=$(COUNT) python3 src/python/fibonacci.py
+	-@env COUNT=$(COUNT) node src/js/fibonacci.js
+
+# Run Factorial
+run_factorial: all
+	@echo "--- Factorial (COUNT=$(COUNT)) ---"
+	@echo "\n[C++]"
+	-@env COUNT=$(COUNT) ./bin/factorial_cpp
+	@echo "\n[Go]"
+	-@env COUNT=$(COUNT) ./bin/factorial_go
+	@echo "\n[Rust]"
+	-@env COUNT=$(COUNT) ./bin/factorial_rs
+	@echo "\n[Java]"
+	-@env COUNT=$(COUNT) java -cp bin Factorial
+	@echo "\n[Fortran]"
+	-@env COUNT=$(COUNT) ./bin/factorial_f90
+	@echo "\n[Python]"
+	-@env COUNT=$(COUNT) python3 src/python/factorial.py
+	@echo "\n[JavaScript]"
+	-@env COUNT=$(COUNT) node src/js/factorial.js
+
+# Verify Factorial
+verify: all
+	@python3 tests/verify_factorial.py $(COUNT)
 
 # Clean up compiled files
 clean:
