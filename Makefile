@@ -3,29 +3,32 @@
 COUNT ?= 10
 
 # Default target: build all applications
-all: fibonacci_cpp fibonacci_go fibonacci_rs Fibonacci.class fibonacci_f90
+all: bin_dir cpp go rust java fortran
+
+bin_dir:
+	@mkdir -p bin
 
 # C++
-fibonacci_cpp: fibonacci.cpp
-	-g++ fibonacci.cpp -o fibonacci_cpp
+cpp: src/cpp/fibonacci.cpp
+	-g++ src/cpp/fibonacci.cpp -o bin/fibonacci_cpp
 
 # Go
-fibonacci_go: fibonacci.go
-	-go build -o fibonacci_go fibonacci.go
+go: src/go/fibonacci.go
+	-go build -o bin/fibonacci_go src/go/fibonacci.go
 
 # Rust
-fibonacci_rs: fibonacci.rs
-	-rustc fibonacci.rs -o fibonacci_rs
+rust: src/rust/fibonacci.rs
+	-rustc src/rust/fibonacci.rs -o bin/fibonacci_rs
 
 # Java
-Fibonacci.class: Fibonacci.java
-	-javac Fibonacci.java
+java: src/java/Fibonacci.java
+	-javac -d bin src/java/Fibonacci.java
 
 # Fortran
-fibonacci_f90: fibonacci.f90
-	-gfortran fibonacci.f90 -o fibonacci_f90
+fortran: src/fortran/fibonacci.f90
+	-gfortran src/fortran/fibonacci.f90 -o bin/fibonacci_f90
 
-# Phony targets for interpreted languages (no compilation needed)
+# Phony targets for interpreted languages
 .PHONY: python js
 python:
 	@echo "Python is an interpreted language, no compilation needed."
@@ -33,24 +36,24 @@ python:
 js:
 	@echo "JavaScript (Node.js) is interpreted, no compilation needed."
 
-# Run all applications (ignore errors to run all)
-run:
+# Run all applications
+run: all
 	@echo "Running C++ Fibonacci:"
-	-@time env COUNT=$(COUNT) ./fibonacci_cpp
+	-@time env COUNT=$(COUNT) ./bin/fibonacci_cpp
 	@echo "\nRunning Go Fibonacci:"
-	-@time env COUNT=$(COUNT) ./fibonacci_go
+	-@time env COUNT=$(COUNT) ./bin/fibonacci_go
 	@echo "\nRunning Rust Fibonacci:"
-	-@time env COUNT=$(COUNT) ./fibonacci_rs
+	-@time env COUNT=$(COUNT) ./bin/fibonacci_rs
 	@echo "\nRunning Java Fibonacci:"
-	-@time env COUNT=$(COUNT) java Fibonacci
+	-@time env COUNT=$(COUNT) java -cp bin Fibonacci
 	@echo "\nRunning Fortran Fibonacci:"
-	-@time env COUNT=$(COUNT) ./fibonacci_f90
+	-@time env COUNT=$(COUNT) ./bin/fibonacci_f90
 	@echo "\nRunning Python Fibonacci:"
-	-@time env COUNT=$(COUNT) python3 fibonacci.py
+	-@time env COUNT=$(COUNT) python3 src/python/fibonacci.py
 	@echo "\nRunning JavaScript Fibonacci:"
-	-@time env COUNT=$(COUNT) node fibonacci.js
+	-@time env COUNT=$(COUNT) node src/js/fibonacci.js
 
 # Clean up compiled files
 clean:
-	rm -f fibonacci_cpp fibonacci_go fibonacci_rs Fibonacci.class fibonacci_f90
+	rm -rf bin
 
