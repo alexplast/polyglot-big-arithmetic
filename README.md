@@ -1,9 +1,3 @@
-Понял. Вероятно, ты имел в виду раздел **Conclusions**, который был в оригинальном README и пропал в моем предыдущем варианте, или же ты хотел сохранить структуру "Observations + Conclusions".
-
-Я возвращаю полную структуру `README.md`, включая выводы, обновленные с учетом наших новых результатов (где C++ и Fortran стали значительно быстрее благодаря оптимизации), и вставляю **актуальную таблицу** из твоего последнего запуска бенчмарка.
-
-File: README.md
-```md
 # Polyglot Big Arithmetic
 
 This project explores the implementation of fundamental mathematical algorithms (Fibonacci Sequence, Factorial, and Power) across 7 different programming languages: **C++, Go, Rust, Java, Fortran, Python, and JavaScript**.
@@ -20,8 +14,8 @@ The core objective is to compare how different languages handle large numbers, m
 ├── bin/                # Compiled executables
 ├── src/                # Source code organized by language
 └── tests/              # Verification and benchmark scripts
-    ├── benchmark.py    # Auto-benchmark script
-    └── verify_*.py     # Correctness tests
+    ├── benchmark.py    # BigInt benchmark
+    └── benchmark_float.py # Float vs BigInt benchmark
 ```
 
 ## Technical Implementation Details
@@ -37,34 +31,11 @@ The project highlights the difference between **Fixed-Width Integers** and **Arb
 ### Our Solution: Optimized Manual BigInt
 To ensure parity, we implemented **Manual BigInt logic** in the compiled languages (C++, Rust, Fortran).
 *   **Base $10^9$ Optimization**: Instead of storing one digit per array element (Base 10), we store **9 digits** (values up to 999,999,999) in each integer block.
-*   **Effect**: This reduces the number of operations and memory usage by a factor of ~9, significantly improving performance compared to naive implementations.
-*   **Arithmetic**: "Pencil and paper" algorithms for addition and multiplication adapted for Base $10^9$.
+*   **Effect**: This reduces the number of operations and memory usage by a factor of ~9.
 
-## How to Use
+## Performance Comparison (BigInt)
 
-### Build
-```bash
-make all
-```
-
-### Run Benchmark
-To run the performance test and automatically update this README:
-```bash
-python3 tests/benchmark.py
-```
-
-### Verify
-Automated tests compare result outputs against Python's ground truth:
-```bash
-make verify_all
-```
-
-## Performance Comparison
-
-**Benchmark settings:**
-- **Fibonacci**: $N = 5000$
-- **Factorial**: $N = 2000$
-- **Power**: $2^{5000}$
+**Benchmark settings:** $N=5000$ (Fibonacci), $N=2000$ (Factorial), $2^{5000}$ (Power).
 
 | Language | Fibonacci (5000) | Factorial (2000) | Power (2^5000) | BigInt Type |
 | :--- | :--- | :--- | :--- | :--- |
@@ -76,23 +47,37 @@ make verify_all
 | **JavaScript** | 2.769 ms | 5.429 ms | 0.101 ms | BigInt |
 | **Fortran** | 3.794 ms | 64.983 ms | 29.143 ms | Custom Base 10^9 |
 
-### Observations
-*   **Native Libraries win**: Python, Go, and Java use highly optimized assembly-level routines (like Karatsuba multiplication), making them extremely fast for Multiplication/Power.
-*   **C++ & Fortran Speed**: Thanks to the **Base $10^9$** optimization, our manual implementations are now very performant. **Fortran** is exceptionally fast in Fibonacci (Array Addition), beating C++ and Java.
-*   **Memory Efficiency**: The move from Base 10 to Base $10^9$ reduced memory consumption by factor of 9 for C++, Rust, and Fortran.
+## Experiment: BigInt vs Native Float
 
-## Native Type Limits
+We ran a secondary benchmark to measure the overhead of "BigInt" abstraction against native CPU floating-point arithmetic (IEEE 754 `double`).
+*   **Inputs**: Reduced to fit in 64-bit float (Fibonacci 1475, Factorial 170, Power 2^1023).
+*   **Speedup**: Represents how much faster Native Float is compared to BigInt on small numbers.
 
-| Operation | 64-bit max | 128-bit max |
-|:----------|:-----------|:------------|
-| Fibonacci | F(93) | F(186) |
-| Factorial | 20! | 34! |
-| Power (base=2) | 2^63 | 2^127 |
+| Language | Alg | BigInt Time | Float Time | Speedup |
+| :--- | :--- | :--- | :--- | :--- |
+| **Rust** | Fibo | 2.324 ms | 0.013 ms | **178.8x** |
+| | Fact | 0.148 ms | 0.003 ms | **49.3x** |
+| **Go** | Fibo | 0.503 ms | 0.002 ms | **251.5x** |
+| | Fact | 0.028 ms | 0.001 ms | **28.0x** |
+| **Java** | Fact | 0.996 ms | 0.003 ms | **332.0x** |
+| **Python** | Fibo | 0.202 ms | 0.072 ms | **2.8x** |
+| **JavaScript**| Fibo | 0.234 ms | 0.076 ms | **3.1x** |
 
-## Conclusions
-*   **Optimization Matters**: The transition from naive Base 10 to Base $10^9$ arithmetic improved C++ and Rust performance by an order of magnitude.
-*   **Language Strengths**: 
-    *   **Python/Go** are best for "out of the box" large math.
-    *   **Fortran** proves it is still a powerhouse for array-based number crunching.
-    *   **Rust/C++** allow full control over implementation details but require significant effort to match standard library speeds.
-*   **Scalability**: All 7 implementations successfully handle inputs that would overflow standard hardware types, processing numbers with thousands of digits.
+### Conclusions
+1.  **Hardware Dominance**: Compiled languages (Rust, Go) show massive speedups (**50x - 300x**) when switching to native CPU instructions. This demonstrates the heavy cost of software-defined arbitrary precision arithmetic.
+2.  **The Interpreter Floor**: Interpreted languages (Python, JS) show only a **~3x** speedup. The bottleneck here is the interpreter loop (instruction dispatch), not the arithmetic itself.
+3.  **Optimization Anomalies**: In some cases (like Power), native Float in Python/JS was actually *slower* than BigInt. This is because the BigInt `pow()` implementation in these languages is highly optimized C code, whereas the Float path incurs type conversion overheads that outweigh the calculation cost for small numbers.
+
+## How to Use
+
+### Build
+```bash
+make all      # Build BigInt versions
+make float    # Build Float versions
+```
+
+### Run Benchmarks
+```bash
+python3 tests/benchmark.py        # Run BigInt Benchmark
+python3 tests/benchmark_float.py  # Run Float Comparison
+```
