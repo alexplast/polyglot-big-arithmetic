@@ -11,14 +11,13 @@ FLOAT_COUNT_FACT ?= 170
 FLOAT_BASE ?= 2
 FLOAT_EXP ?= 1023
 
-# Default: build everything
 all: fibo fact power matrix float
 
 # --- Compile Groups ---
-fibo: bin_dirs cpp_fibo go_fibo rust_fibo java_fibo fortran_fibo
-fact: bin_dirs cpp_fact go_fact rust_fact java_fact fortran_fact
-power: bin_dirs cpp_power go_power rust_power java_power fortran_power
-matrix: bin_dirs cpp_matrix go_matrix rust_matrix java_matrix fortran_matrix
+fibo: bin_dirs cpp_fibo c_fibo go_fibo rust_fibo java_fibo fortran_fibo
+fact: bin_dirs cpp_fact c_fact go_fact rust_fact java_fact fortran_fact
+power: bin_dirs cpp_power c_power go_power rust_power java_power fortran_power
+matrix: bin_dirs cpp_matrix c_matrix asm_matrix go_matrix rust_matrix java_matrix fortran_matrix
 float: bin_dirs float_compile
 
 bin_dirs:
@@ -34,6 +33,20 @@ cpp_power: src/cpp/power.cpp
 	-g++ -O3 src/cpp/power.cpp -o bin/power/power_cpp
 cpp_matrix: src/cpp/matrix.cpp
 	-g++ -O3 src/cpp/matrix.cpp -o bin/matrix/matrix_cpp
+
+# --- C (Pure) ---
+c_fibo: src/c/fibonacci.c
+	-gcc -O3 src/c/fibonacci.c -o bin/fibo/fibonacci_c
+c_fact: src/c/factorial.c
+	-gcc -O3 src/c/factorial.c -o bin/fact/factorial_c
+c_power: src/c/power.c
+	-gcc -O3 src/c/power.c -o bin/power/power_c
+c_matrix: src/c/matrix.c
+	-gcc -O3 src/c/matrix.c -o bin/matrix/matrix_c
+
+# --- Assembler (GCC/GAS) ---
+asm_matrix: src/asm/matrix.s
+	-gcc -no-pie src/asm/matrix.s -o bin/matrix/matrix_asm
 
 # --- Go ---
 go_fibo: src/go/fibonacci.go
@@ -80,6 +93,9 @@ float_compile:
 	-g++ -O3 src/cpp/fibonacci_float.cpp -o bin/float/fibo/fibonacci_cpp
 	-g++ -O3 src/cpp/factorial_float.cpp -o bin/float/fact/factorial_cpp
 	-g++ -O3 src/cpp/power_float.cpp -o bin/float/power/power_cpp
+	-gcc -O3 src/c/fibonacci_float.c -o bin/float/fibo/fibonacci_c
+	-gcc -O3 src/c/factorial_float.c -o bin/float/fact/factorial_c
+	-gcc -O3 src/c/power_float.c -o bin/float/power/power_c
 	-go build -o bin/float/fibo/fibonacci_go src/go/fibonacci_float.go
 	-go build -o bin/float/fact/factorial_go src/go/factorial_float.go
 	-go build -o bin/float/power/power_go src/go/power_float.go
@@ -94,7 +110,6 @@ float_compile:
 	-gfortran -O3 src/fortran/power_float.f90 -o bin/float/power/power_f90
 
 # --- Runners ---
-# Ensure 'all' is built before running benchmarks
 bench_all: all
 	@echo "Running All Benchmarks and Updating README..."
 	@python3 tests/benchmark.py

@@ -11,7 +11,7 @@ def run_command(cmd, env_vars):
         match = re.search(r"Time: ([0-9\.\-eE]+) ms", result.stdout)
         if match:
             return float(match.group(1))
-        return 0.0 # Capture fast times as 0.0 usually, but logic below handles it
+        return 0.0
     except:
         return None
 
@@ -39,16 +39,16 @@ def update_readme_section(content, marker_start, marker_end):
         if found:
             with open(readme_path, "w", encoding="utf-8") as f:
                 f.writelines(new_lines)
-            print(f"[SUCCESS] Updated {marker_start} in README.md")
+            print(f"[SUCCESS] Updated README.md")
     except:
         pass
 
 def benchmark_float():
     FIBO = "1475"
-    
-    print(f"--- Running Float Comparison Benchmark ---")
+    print(f"\n--- 2. Float Benchmark ---")
 
     languages = [
+        {"name": "C", "b": "./bin/fibo/fibonacci_c", "f": "./bin/float/fibo/fibonacci_c"},
         {"name": "C++", "b": "./bin/fibo/fibonacci_cpp", "f": "./bin/float/fibo/fibonacci_cpp"},
         {"name": "Rust", "b": "./bin/fibo/fibonacci_rs", "f": "./bin/float/fibo/fibonacci_rs"},
         {"name": "Go", "b": "./bin/fibo/fibonacci_go", "f": "./bin/float/fibo/fibonacci_go"},
@@ -62,46 +62,35 @@ def benchmark_float():
     for lang in languages:
         t_big = run_command(lang['b'], {"COUNT": FIBO})
         t_flt = run_command(lang['f'], {"COUNT": FIBO})
-        results.append({
-            "name": lang['name'],
-            "big": t_big,
-            "flt": t_flt
-        })
+        results.append({"name": lang['name'], "big": t_big, "flt": t_flt})
 
-    # Sort by Float Time (fastest first)
-    # Treat None or 0.0 (too fast) carefully. 
-    # If 0.0, it is fastest.
     results.sort(key=lambda x: x['flt'] if x['flt'] is not None else 999999.0)
-
-    # Determine baseline (fastest float time that isn't 0 if possible, or just min)
-    # Note: If C++ gives 0.000, it's the baseline.
     baseline_val = results[0]['flt']
-    if baseline_val == 0: baseline_val = 0.0000001 # Avoid division by zero
+    if baseline_val == 0: baseline_val = 0.0000001
 
     md = "| Language | Float Time | Rel Speed | BigInt Time | Hardware Speedup |\n"
     md += "| :--- | :--- | :--- | :--- | :--- |\n"
 
+    print(f"{'Language':<12} | {'Float Time':<12} | {'Rel Speed':<10} | {'Hardware Speedup':<15}")
+    print("-" * 60)
+
     for r in results:
-        # Time strings
-        s_big = f"{r['big']:.3f} ms" if r['big'] is not None else "—"
         s_flt = f"{r['flt']:.4f} ms" if r['flt'] is not None else "—"
+        s_big = f"{r['big']:.3f} ms" if r['big'] is not None else "—"
         
-        # Speedup (BigInt vs Float within same lang)
         speedup = "—"
-        if r['big'] is not None and r['flt'] is not None and r['flt'] > 0:
+        if r['big'] and r['flt'] and r['flt'] > 0:
             speedup = f"{r['big']/r['flt']:.1f}x"
-        elif r['big'] is not None and r['flt'] == 0:
+        elif r['big'] and r['flt'] == 0:
             speedup = "Max"
 
-        # Relative (Lang vs Lang Baseline)
         rel = "—"
         if r['flt'] is not None:
             val = r['flt']
-            if val <= baseline_val: # Handle close to 0
-                 rel = "1.00x"
-            else:
-                 rel = f"{val/baseline_val:.2f}x"
+            if val <= baseline_val: rel = "1.00x"
+            else: rel = f"{val/baseline_val:.2f}x"
 
+        print(f"{r['name']:<12} | {s_flt:<12} | {rel:<10} | {speedup:<15}")
         md += f"| **{r['name']}** | {s_flt} | {rel} | {s_big} | {speedup} |\n"
 
     update_readme_section(md, "<!-- BENCHMARK_FLOAT_START -->", "<!-- BENCHMARK_FLOAT_END -->")

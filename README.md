@@ -42,13 +42,14 @@ Sorted by **Factorial** calculation time.
 <!-- BENCHMARK_BIGINT_START -->
 | Language | Factorial (2000) | Rel Speed | Fibonacci (5000) | Power (2^5000) | BigInt Type |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Go** | 0.754 ms | 1.00x | 3.805 ms | 0.089 ms | math/big |
-| **Python** | 1.341 ms | 1.78x | 1.960 ms | 0.013 ms | Native |
-| **Fortran** | 1.701 ms | 2.26x | 0.943 ms | 0.228 ms | Custom Base 10^9 |
-| **Rust** | 1.844 ms | 2.45x | 1.846 ms | 0.122 ms | Custom Base 10^9 |
-| **C++** | 1.879 ms | 2.49x | 1.738 ms | 0.134 ms | Custom Base 10^9 |
-| **JavaScript** | 4.758 ms | 6.31x | 6.267 ms | 0.092 ms | BigInt |
-| **Java** | 12.103 ms | 16.05x | 9.328 ms | 0.029 ms | BigInteger |
+| **Go** | 0.810 ms | 1.00x | 1.942 ms | 0.102 ms | math/big |
+| **Python** | 1.250 ms | 1.54x | 0.749 ms | 0.013 ms | Native |
+| **Fortran** | 1.549 ms | 1.91x | 0.908 ms | 0.105 ms | Custom Base 10^9 |
+| **Rust** | 1.658 ms | 2.05x | 1.322 ms | 0.097 ms | Custom Base 10^9 |
+| **C** | 1.714 ms | 2.12x | 2.185 ms | 0.102 ms | Custom Base 10^9 |
+| **C++** | 1.750 ms | 2.16x | 1.974 ms | 0.087 ms | Custom Base 10^9 |
+| **JavaScript** | 3.415 ms | 4.22x | 3.446 ms | 0.098 ms | BigInt |
+| **Java** | 10.108 ms | 12.48x | 5.206 ms | 0.030 ms | BigInteger |
 
 <!-- BENCHMARK_BIGINT_END -->
 
@@ -59,13 +60,14 @@ Sorted by native **Float CPU speed**.
 <!-- BENCHMARK_FLOAT_START -->
 | Language | Float Time | Rel Speed | BigInt Time | Hardware Speedup |
 | :--- | :--- | :--- | :--- | :--- |
-| **Rust** | 0.0020 ms | 1.00x | 0.215 ms | 107.5x |
-| **Go** | 0.0020 ms | 1.00x | 0.608 ms | 304.0x |
-| **C++** | 0.0022 ms | 1.10x | 0.210 ms | 95.5x |
-| **Java** | 0.0310 ms | 15.50x | 2.377 ms | 76.7x |
-| **Python** | 0.0700 ms | 35.00x | 0.261 ms | 3.7x |
-| **Fortran** | 0.0706 ms | 35.30x | 0.191 ms | 2.7x |
-| **JavaScript** | 0.2380 ms | 119.00x | 0.219 ms | 0.9x |
+| **C** | 0.0018 ms | 1.00x | 0.295 ms | 163.9x |
+| **Rust** | 0.0020 ms | 1.11x | 0.333 ms | 166.5x |
+| **Go** | 0.0020 ms | 1.11x | 0.334 ms | 167.0x |
+| **Fortran** | 0.0020 ms | 1.11x | 0.088 ms | 44.0x |
+| **C++** | 0.0023 ms | 1.28x | 0.263 ms | 114.3x |
+| **Java** | 0.0310 ms | 17.22x | 1.747 ms | 56.4x |
+| **Python** | 0.0690 ms | 38.33x | 0.173 ms | 2.5x |
+| **JavaScript** | 0.1010 ms | 56.11x | 0.253 ms | 2.5x |
 
 <!-- BENCHMARK_FLOAT_END -->
 
@@ -76,13 +78,15 @@ Naive O(N^3) Matrix Multiplication (256x256), 1D arrays, 64-bit floats.
 <!-- BENCHMARK_MATRIX_START -->
 | Language | Matrix Mult (256x256) | Relative Speed |
 | :--- | :--- | :--- |
-| **C++** | 18.437 ms | 1.00x (Baseline) |
-| **Fortran** | 21.510 ms | 1.17x |
-| **Java** | 28.842 ms | 1.56x |
-| **Rust** | 37.518 ms | 2.03x |
-| **Go** | 49.476 ms | 2.68x |
-| **JavaScript** | 79.901 ms | 4.33x |
-| **Python** | 2638.812 ms | 143.13x |
+| **C++** | 8.450 ms | 1.00x |
+| **Assembler** | 9.323 ms | 1.10x |
+| **C** | 10.427 ms | 1.23x |
+| **Fortran** | 10.942 ms | 1.29x |
+| **Rust** | 15.159 ms | 1.79x |
+| **Java** | 37.831 ms | 4.48x |
+| **Go** | 39.011 ms | 4.62x |
+| **JavaScript** | 69.698 ms | 8.25x |
+| **Python** | 2093.196 ms | 247.72x |
 
 <!-- BENCHMARK_MATRIX_END -->
 

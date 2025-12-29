@@ -1,8 +1,8 @@
 program fibonacci_float
     implicit none
     integer :: i, count, stat_val
-    integer, parameter :: qp = selected_real_kind(33, 4931)
-    real(kind=qp) :: a, b, temp
+    ! Reverted to standard 64-bit float
+    real(kind=8) :: a, b, temp
     integer(kind=8) :: start_time, end_time, clock_rate
     real(kind=8) :: time_ms
     character(len=100) :: count_env
@@ -14,8 +14,8 @@ program fibonacci_float
         count = 1475
     end if
 
-    a = 0.0_qp
-    b = 1.0_qp
+    a = 0.0_8
+    b = 1.0_8
 
     call system_clock(start_time, clock_rate)
     do i = 1, count
@@ -27,7 +27,7 @@ program fibonacci_float
 
     time_ms = real(end_time - start_time, 8) * 1000.0_8 / real(clock_rate, 8)
 
-    print '("Result(F_", I0, "): ", ES24.14)', count, a
+    print '("Result(F_", I0, "): ", ES20.10)', count, a
     print '("Time: ", F0.6, " ms")', time_ms
 
 end program fibonacci_float
