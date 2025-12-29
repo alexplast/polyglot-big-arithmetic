@@ -1,9 +1,9 @@
 Language,Factorial Time (ms),Relative Speed,Fibonacci Time (ms),Power Time (ms),Implementation Type
-Go,3.5320,1.00x,28.5740,0.1070,math/big
-Python,8.0220,2.27x,11.2390,0.0570,Native
-Fortran,11.2060,3.17x,22.6680,1.3370,Custom Base 10^9
-Rust,11.5410,3.27x,30.3190,1.6030,Custom Base 10^9
-JavaScript,12.3470,3.50x,19.1570,0.1760,BigInt
-C,12.6750,3.59x,57.5850,1.5310,Custom Base 10^9
-C++,13.6250,3.86x,38.1730,1.6630,Custom Base 10^9
-Java,43.6030,12.35x,47.5150,0.0450,BigInteger
+Go,2.9280,1.00x,22.1610,0.0870,math/big
+Python,7.5070,2.56x,10.5470,0.0540,Native
+Fortran,10.8380,3.70x,22.4530,1.2790,Custom Base 10^9
+JavaScript,10.9800,3.75x,14.8050,0.1580,BigInt
+C,11.6980,4.00x,54.3040,1.4760,Custom Base 10^9
+C++,12.2570,4.19x,26.0440,1.2280,Custom Base 10^9
+Rust,12.3510,4.22x,29.6600,1.5820,Custom Base 10^9
+Java,41.6920,14.24x,45.2160,0.0350,BigInteger

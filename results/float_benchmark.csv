@@ -1,9 +1,9 @@
 Language,Float Time (ms),Relative Speed
-Rust,306.5710,1.00x
-Java,315.4110,1.03x
-Fortran,336.4630,1.10x
-JavaScript,338.4670,1.10x
-C++,414.9700,1.35x
-Go,417.0000,1.36x
-C,436.2970,1.42x
-Python,16672.7000,54.38x
+Rust,309.2070,1.00x
+Java,318.9120,1.03x
+Fortran,320.1920,1.04x
+JavaScript,324.1930,1.05x
+C++,412.1070,1.33x
+C,415.0750,1.34x
+Go,427.0000,1.38x
+Python,14370.3530,46.47x
