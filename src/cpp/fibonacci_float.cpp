@@ -6,27 +6,24 @@
 int main() {
     const char* count_env = std::getenv("COUNT");
     int n = 1475;
-    if (count_env) {
-        n = std::atoi(count_env);
-    }
+    if (count_env) n = std::atoi(count_env);
 
-    if (n < 0) return 0;
+    double a = 0.0, b = 1.0;
     
-    // long double
-    long double a = 0.0;
-    long double b = 1.0;
-
     auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < n; i++) {
-        long double temp = a;
-        a = b;
-        b = temp + b;
+    // Run 200,000 iterations to measure CPU throughput
+    for (int k = 0; k < 200000; k++) {
+        a = 0.0; b = 1.0;
+        for (int i = 0; i < n; i++) {
+            double temp = a;
+            a = b;
+            b = temp + b;
+        }
     }
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    std::cout << "Result(F_" << n << "): " << std::scientific << std::setprecision(10) << a << std::endl;
-    std::cout << "Time: " << std::fixed << std::setprecision(6) << duration.count() / 1000000.0 << " ms" << std::endl;
-
+    std::cout << "Result: " << a << std::endl;
+    std::cout << "Time: " << std::fixed << std::setprecision(3) << duration.count() / 1000.0 << " ms" << std::endl;
     return 0;
 }

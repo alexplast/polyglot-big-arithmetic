@@ -1,9 +1,10 @@
 # Makefile for Polyglot Math Benchmark
 
-COUNT ?= 10
+COUNT ?= 25000
+FACT_COUNT ?= 5000
 BASE ?= 2
-EXP ?= 1000
-MATRIX_SIZE ?= 256
+EXP ?= 20000
+MATRIX_SIZE ?= 600
 
 # Limits for Float benchmark
 FLOAT_COUNT_FIBO ?= 1475
@@ -23,6 +24,7 @@ float: bin_dirs float_compile
 bin_dirs:
 	@mkdir -p bin/fibo bin/fact bin/power bin/matrix
 	@mkdir -p bin/float/fibo bin/float/fact bin/float/power
+	@mkdir -p results
 
 # --- C++ ---
 cpp_fibo: src/cpp/fibonacci.cpp
@@ -110,6 +112,7 @@ float_compile:
 	-gfortran -O3 src/fortran/power_float.f90 -o bin/float/power/power_f90
 
 # --- Runners ---
+# Ensure 'all' is built before running benchmarks
 bench_all: all
 	@echo "Running All Benchmarks and Updating README..."
 	@python3 tests/benchmark.py
@@ -117,4 +120,4 @@ bench_all: all
 	@python3 tests/benchmark_matrix.py
 
 clean:
-	rm -rf bin
+	rm -rf bin results

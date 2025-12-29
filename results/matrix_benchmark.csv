@@ -1,0 +1,10 @@
+Language,Matrix Time (ms),Relative Speed
+Fortran,96.9600,1.00x
+Assembler,116.8710,1.21x
+C,124.7790,1.29x
+C++,127.9070,1.32x
+Rust,140.2330,1.45x
+Java,231.1000,2.38x
+Go,352.2660,3.63x
+JavaScript,618.7570,6.38x
+Python,31922.7530,329.24x
