@@ -16,14 +16,13 @@ void init(BigInt *n, uint64_t val) {
     n->capacity = 16;
     n->digits = (uint64_t*)calloc(n->capacity, sizeof(uint64_t));
     if (val == 0) {
-        n->size = 0; // Handle 0 specifically usually, but here we treat size 0 as 0
         n->digits[0] = 0;
         n->size = 1;
     } else {
         n->digits[0] = val;
         n->size = 1;
     }
-    while (val >= BASE) { // Handle init with > BASE if needed
+    while (val >= BASE) { 
         n->digits[n->size-1] = val % BASE;
         val /= BASE;
         if (n->size == n->capacity) {
@@ -36,12 +35,10 @@ void init(BigInt *n, uint64_t val) {
 
 // Result = A * B
 void multiply(BigInt *res, BigInt *a, BigInt *b) {
-    // Reset result
     if (res->capacity < a->size + b->size) {
         res->capacity = a->size + b->size + 16;
         res->digits = (uint64_t*)realloc(res->digits, res->capacity * sizeof(uint64_t));
     }
-    // Zero out
     memset(res->digits, 0, res->capacity * sizeof(uint64_t));
     
     for (int i = 0; i < a->size; i++) {
@@ -71,9 +68,10 @@ void copy(BigInt *dest, BigInt *src) {
 
 void print_bigint(BigInt *n) {
     if (n->size == 0) { printf("0"); return; }
-    printf("%lu", n->digits[n->size - 1]);
+    // Исправлено для совместимости macOS/Linux
+    printf("%llu", (unsigned long long)n->digits[n->size - 1]);
     for (int i = n->size - 2; i >= 0; i--) {
-        printf("%09lu", n->digits[i]);
+        printf("%09llu", (unsigned long long)n->digits[i]);
     }
 }
 
@@ -88,7 +86,7 @@ int main() {
     BigInt base, result, temp_base, temp_res;
     init(&base, base_val);
     init(&result, 1);
-    init(&temp_base, 0); // buffers
+    init(&temp_base, 0);
     init(&temp_res, 0);
 
     struct timespec start, end;
@@ -96,11 +94,11 @@ int main() {
 
     while (exp_val > 0) {
         if (exp_val % 2 == 1) {
-            multiply(&temp_res, &result, &base); // temp = res * base
-            copy(&result, &temp_res);            // res = temp
+            multiply(&temp_res, &result, &base);
+            copy(&result, &temp_res);
         }
-        multiply(&temp_base, &base, &base);      // temp = base * base
-        copy(&base, &temp_base);                 // base = temp
+        multiply(&temp_base, &base, &base);
+        copy(&base, &temp_base);
         exp_val /= 2;
     }
 

@@ -1,2 +1,7 @@
 bin/
+results/
+data.bin
 *.class
+__pycache__/
+*.o
+.DS_Store

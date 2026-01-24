@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <chrono>
 #include <iomanip>
-#include <cstdint>
+#include <fstream>
 
 int main() {
     int N = 10000;
@@ -11,11 +11,19 @@ int main() {
     if (n_env) N = std::atoi(n_env);
 
     std::vector<double> arr(N);
-    uint32_t seed = 42;
-    for (int i = 0; i < N; i++) {
-        seed = (seed * 1664525 + 1013904223);
-        arr[i] = (double)seed / 4294967296.0;
+
+    // Read from binary file
+    std::ifstream file("data.bin", std::ios::binary);
+    if (!file) {
+        std::cerr << "Error: 'data.bin' not found. Run 'python3 tests/gen_data.py' first.\n";
+        return 1;
     }
+    file.read(reinterpret_cast<char*>(arr.data()), N * sizeof(double));
+    
+    if (!file) {
+        std::cerr << "Warning: Could not read all " << N << " elements.\n";
+    }
+    file.close();
 
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -32,9 +40,12 @@ int main() {
 
     std::cout << "Sort(" << N << "): ";
     std::cout << std::fixed << std::setprecision(4);
-    for(int i=0; i<5; i++) std::cout << arr[i] << " ";
+    int print_limit = (N < 5) ? N : 5;
+    for(int i=0; i<print_limit; i++) std::cout << arr[i] << " ";
     std::cout << "... ";
-    for(int i=N-5; i<N; i++) std::cout << arr[i] << " ";
+    if (N > 5) {
+        for(int i=N-5; i<N; i++) std::cout << arr[i] << " ";
+    }
     std::cout << "\n";
 
     std::cout << "Time: " << std::fixed << std::setprecision(3) << duration.count() / 1000.0 << " ms" << std::endl;

@@ -12,7 +12,7 @@ typedef struct {
 } BigInt;
 
 void init(BigInt *n, uint64_t val) {
-    n->capacity = 1000; // Pre-allocate more for factorial
+    n->capacity = 1000;
     n->digits = (uint64_t*)malloc(n->capacity * sizeof(uint64_t));
     n->digits[0] = val;
     n->size = 1;
@@ -37,9 +37,9 @@ void mul(BigInt *n, int val) {
 
 void print_bigint(BigInt *n) {
     if (n->size == 0) { printf("0"); return; }
-    printf("%lu", n->digits[n->size - 1]);
+    printf("%llu", (unsigned long long)n->digits[n->size - 1]);
     for (int i = n->size - 2; i >= 0; i--) {
-        printf("%09lu", n->digits[i]);
+        printf("%09llu", (unsigned long long)n->digits[i]);
     }
 }
 

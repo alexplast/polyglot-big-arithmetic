@@ -55,9 +55,10 @@ void add(BigInt *dest, BigInt *other) {
 
 void print_bigint(BigInt *n) {
     if (n->size == 0) { printf("0"); return; }
-    printf("%lu", n->digits[n->size - 1]);
+    // Using %llu and explicit cast for cross-platform compatibility (macOS/Linux)
+    printf("%llu", (unsigned long long)n->digits[n->size - 1]);
     for (int i = n->size - 2; i >= 0; i--) {
-        printf("%09lu", n->digits[i]);
+        printf("%09llu", (unsigned long long)n->digits[i]);
     }
 }
 

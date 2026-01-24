@@ -14,15 +14,14 @@ Sorted by **Factorial** calculation time.
 <!-- BENCHMARK_BIGINT_START -->
 | Language | Factorial (5000) | Rel Speed | Fibonacci (25000) | Power (2^20000) | BigInt Type |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Go** | 2.928 ms | 1.00x | 22.161 ms | 0.087 ms | math/big |
-| **Python** | 7.507 ms | 2.56x | 10.547 ms | 0.054 ms | Native |
-| **Fortran** | 10.838 ms | 3.70x | 22.453 ms | 1.279 ms | Custom Base 10^9 |
-| **JavaScript** | 10.980 ms | 3.75x | 14.805 ms | 0.158 ms | BigInt |
-| **C** | 11.698 ms | 4.00x | 54.304 ms | 1.476 ms | Custom Base 10^9 |
-| **C++** | 12.257 ms | 4.19x | 26.044 ms | 1.228 ms | Custom Base 10^9 |
-| **Rust** | 12.351 ms | 4.22x | 29.660 ms | 1.582 ms | Custom Base 10^9 |
-| **Java** | 41.692 ms | 14.24x | 45.216 ms | 0.035 ms | BigInteger |
-
+| **Go** | 9.234 ms | 1.00x | 44.194 ms | 0.235 ms | math/big |
+| **Python** | 19.953 ms | 2.16x | 39.748 ms | 0.149 ms | Native |
+| **Fortran** | 27.876 ms | 3.02x | 67.059 ms | 4.389 ms | Custom Base 10^9 |
+| **C** | 28.334 ms | 3.07x | 75.735 ms | 4.038 ms | Custom Base 10^9 |
+| **Rust** | 30.579 ms | 3.31x | 121.250 ms | 3.789 ms | Custom Base 10^9 |
+| **C++** | 33.250 ms | 3.60x | 107.861 ms | 4.232 ms | Custom Base 10^9 |
+| **JavaScript** | 47.517 ms | 5.15x | 54.436 ms | 0.341 ms | BigInt |
+| **Java** | 122.178 ms | 13.23x | 134.933 ms | 0.091 ms | BigInteger |
 <!-- BENCHMARK_BIGINT_END -->
 
 ### 2. Native Float Throughput
@@ -33,15 +32,14 @@ Measuring raw CPU scalar performance and loop overhead.
 <!-- BENCHMARK_FLOAT_START -->
 | Language | Float Time (200k iter) | Rel Speed |
 | :--- | :--- | :--- |
-| **Rust** | 309.2 ms | 1.00x |
-| **Java** | 318.9 ms | 1.03x |
-| **Fortran** | 320.2 ms | 1.04x |
-| **JavaScript** | 324.2 ms | 1.05x |
-| **C++** | 412.1 ms | 1.33x |
-| **C** | 415.1 ms | 1.34x |
-| **Go** | 427.0 ms | 1.38x |
-| **Python** | 14370.4 ms | 46.47x |
-
+| **C++** | 725.0 ms | 1.00x |
+| **Rust** | 727.8 ms | 1.00x |
+| **C** | 741.2 ms | 1.02x |
+| **Go** | 838.0 ms | 1.16x |
+| **JavaScript** | 974.5 ms | 1.34x |
+| **Fortran** | 1075.8 ms | 1.48x |
+| **Python** | 46546.9 ms | 64.20x |
+| **Java** | — | — |
 <!-- BENCHMARK_FLOAT_END -->
 
 ### 3. Matrix Multiplication (Native Performance)

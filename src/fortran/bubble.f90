@@ -2,10 +2,10 @@ program bubble_sort
     implicit none
     integer :: n, i, j, stat_val
     real(kind=8), allocatable :: arr(:)
-    real(kind=8) :: temp, seed_val
-    integer(kind=8) :: seed_int
+    real(kind=8) :: temp
     integer(kind=8) :: start_time, end_time, clock_rate
     character(len=100) :: n_env
+    logical :: file_exists
 
     call get_environment_variable("SORT_SIZE", n_env, status=stat_val)
     if (stat_val == 0) then
@@ -16,19 +16,21 @@ program bubble_sort
 
     allocate(arr(n))
     
-    ! LCG
-    seed_int = 42
-    do i = 1, n
-        seed_int = mod(seed_int * 1664525_8 + 1013904223_8, 4294967296_8)
-        arr(i) = real(seed_int, 8) / 4294967296.0_8
-    end do
+    inquire(file="data.bin", exist=file_exists)
+    if (.not. file_exists) then
+        print *, "Error: 'data.bin' not found. Run 'python3 tests/gen_data.py' first."
+        stop
+    end if
+
+    ! Read binary file using stream access (Fortran 2003+)
+    open(10, file='data.bin', access='stream', status='old', form='unformatted')
+    read(10) arr
+    close(10)
 
     call system_clock(start_time, clock_rate)
     
     do i = 1, n - 1
         do j = 1, n - i
-            ! Fortran arrays are 1-based. 
-            ! Logic: compare arr(j) and arr(j+1)
             if (arr(j) > arr(j+1)) then
                 temp = arr(j)
                 arr(j) = arr(j+1)

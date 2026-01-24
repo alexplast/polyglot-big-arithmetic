@@ -1,3 +1,9 @@
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class Bubble {
     public static void main(String[] args) {
         String nEnv = System.getenv("SORT_SIZE");
@@ -7,12 +13,24 @@ public class Bubble {
         }
 
         double[] arr = new double[N];
-        // Use long to simulate unsigned 32-bit math correctly
-        long seed = 42; 
         
-        for (int i = 0; i < N; i++) {
-            seed = (seed * 1664525 + 1013904223) & 0xFFFFFFFFL;
-            arr[i] = (double)seed / 4294967296.0;
+        try {
+            byte[] bytes = Files.readAllBytes(Paths.get("data.bin"));
+            // Ensure we don't read past the file or array bounds
+            int limit = Math.min(N, bytes.length / 8);
+            if (limit < N) {
+                System.err.println("Warning: data.bin smaller than SORT_SIZE");
+            }
+
+            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+            buffer.order(ByteOrder.LITTLE_ENDIAN); // Python struct.pack uses little endian
+
+            for (int i = 0; i < limit; i++) {
+                arr[i] = buffer.getDouble();
+            }
+        } catch (IOException e) {
+            System.err.println("Error: 'data.bin' not found. Run 'python3 tests/gen_data.py' first.");
+            System.exit(1);
         }
 
         long start = System.nanoTime();
@@ -28,9 +46,12 @@ public class Bubble {
         long end = System.nanoTime();
 
         System.out.printf("Sort(%d): ", N);
-        for(int i=0; i<5; i++) System.out.printf("%.4f ", arr[i]);
+        int printLimit = (N < 5) ? N : 5;
+        for(int i=0; i<printLimit; i++) System.out.printf("%.4f ", arr[i]);
         System.out.print("... ");
-        for(int i=N-5; i<N; i++) System.out.printf("%.4f ", arr[i]);
+        if (N > 5) {
+            for(int i=N-5; i<N; i++) System.out.printf("%.4f ", arr[i]);
+        }
         System.out.println();
 
         System.out.printf("Time: %.3f ms%n", (end - start) / 1_000_000.0);

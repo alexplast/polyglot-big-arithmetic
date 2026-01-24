@@ -1,17 +1,7 @@
 # Makefile for Polyglot Math Benchmark
 
-COUNT ?= 25000
-FACT_COUNT ?= 5000
-BASE ?= 2
-EXP ?= 20000
-MATRIX_SIZE ?= 600
-SORT_SIZE ?= 10000
-
-# Limits for Float benchmark
-FLOAT_COUNT_FIBO ?= 1475
-FLOAT_COUNT_FACT ?= 170
-FLOAT_BASE ?= 2
-FLOAT_EXP ?= 1023
+CXX = g++ -std=c++11
+CC = gcc
 
 all: fibo fact power matrix float sort
 
@@ -30,32 +20,32 @@ bin_dirs:
 
 # --- Sort Compiles ---
 sort_compile:
-	-g++ -O3 src/cpp/bubble.cpp -o bin/sort/bubble_cpp
-	-gcc -O3 src/c/bubble.c -o bin/sort/bubble_c
+	-$(CXX) -O3 src/cpp/bubble.cpp -o bin/sort/bubble_cpp
+	-$(CC) -O3 src/c/bubble.c -o bin/sort/bubble_c
 	-go build -o bin/sort/bubble_go src/go/bubble.go
 	-rustc -C opt-level=3 src/rust/bubble.rs -o bin/sort/bubble_rs
 	-javac -d bin/sort src/java/Bubble.java
 	-gfortran -O3 src/fortran/bubble.f90 -o bin/sort/bubble_f90
 	-gcc -no-pie src/asm/bubble.s -o bin/sort/bubble_asm
 
-# --- Other Compiles (Existing) ---
+# --- Other Compiles ---
 cpp_fibo: src/cpp/fibonacci.cpp
-	-g++ -O3 src/cpp/fibonacci.cpp -o bin/fibo/fibonacci_cpp
+	-$(CXX) -O3 src/cpp/fibonacci.cpp -o bin/fibo/fibonacci_cpp
 cpp_fact: src/cpp/factorial.cpp
-	-g++ -O3 src/cpp/factorial.cpp -o bin/fact/factorial_cpp
+	-$(CXX) -O3 src/cpp/factorial.cpp -o bin/fact/factorial_cpp
 cpp_power: src/cpp/power.cpp
-	-g++ -O3 src/cpp/power.cpp -o bin/power/power_cpp
+	-$(CXX) -O3 src/cpp/power.cpp -o bin/power/power_cpp
 cpp_matrix: src/cpp/matrix.cpp
-	-g++ -O3 src/cpp/matrix.cpp -o bin/matrix/matrix_cpp
+	-$(CXX) -O3 src/cpp/matrix.cpp -o bin/matrix/matrix_cpp
 
 c_fibo: src/c/fibonacci.c
-	-gcc -O3 src/c/fibonacci.c -o bin/fibo/fibonacci_c
+	-$(CC) -O3 src/c/fibonacci.c -o bin/fibo/fibonacci_c
 c_fact: src/c/factorial.c
-	-gcc -O3 src/c/factorial.c -o bin/fact/factorial_c
+	-$(CC) -O3 src/c/factorial.c -o bin/fact/factorial_c
 c_power: src/c/power.c
-	-gcc -O3 src/c/power.c -o bin/power/power_c
+	-$(CC) -O3 src/c/power.c -o bin/power/power_c
 c_matrix: src/c/matrix.c
-	-gcc -O3 src/c/matrix.c -o bin/matrix/matrix_c
+	-$(CC) -O3 src/c/matrix.c -o bin/matrix/matrix_c
 
 asm_matrix: src/asm/matrix.s
 	-gcc -no-pie src/asm/matrix.s -o bin/matrix/matrix_asm
@@ -97,12 +87,12 @@ fortran_matrix: src/fortran/matrix.f90
 	-gfortran -O3 src/fortran/matrix.f90 -o bin/matrix/matrix_f90
 
 float_compile:
-	-g++ -O3 src/cpp/fibonacci_float.cpp -o bin/float/fibo/fibonacci_cpp
-	-g++ -O3 src/cpp/factorial_float.cpp -o bin/float/fact/factorial_cpp
-	-g++ -O3 src/cpp/power_float.cpp -o bin/float/power/power_cpp
-	-gcc -O3 src/c/fibonacci_float.c -o bin/float/fibo/fibonacci_c
-	-gcc -O3 src/c/factorial_float.c -o bin/float/fact/factorial_c
-	-gcc -O3 src/c/power_float.c -o bin/float/power/power_c
+	-$(CXX) -O3 src/cpp/fibonacci_float.cpp -o bin/float/fibo/fibonacci_cpp
+	-$(CXX) -O3 src/cpp/factorial_float.cpp -o bin/float/fact/factorial_cpp
+	-$(CXX) -O3 src/cpp/power_float.cpp -o bin/float/power/power_cpp
+	-$(CC) -O3 src/c/fibonacci_float.c -o bin/float/fibo/fibonacci_c
+	-$(CC) -O3 src/c/factorial_float.c -o bin/float/fact/factorial_c
+	-$(CC) -O3 src/c/power_float.c -o bin/float/power/power_c
 	-go build -o bin/float/fibo/fibonacci_go src/go/fibonacci_float.go
 	-go build -o bin/float/fact/factorial_go src/go/factorial_float.go
 	-go build -o bin/float/power/power_go src/go/power_float.go
@@ -118,11 +108,7 @@ float_compile:
 
 # --- Runners ---
 bench_all: all
-	@echo "Running All Benchmarks and Updating README..."
-	@python3 tests/benchmark.py
-	@python3 tests/benchmark_float.py
-	@python3 tests/benchmark_matrix.py
-	@python3 tests/benchmark_sort.py
+	@python3 tests/runner.py --bench all
 
 clean:
 	rm -rf bin results

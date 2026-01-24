@@ -56,7 +56,7 @@ main:
     mov rdi, rbx; call malloc; mov [C], rax
 
     # 2. Initialize Arrays
-    # Standard logic to setup values
+    # A[i] = 1.0 + ... B[i] = 1.0 - ...
     mov rdi, [A]
     mov rsi, [B]
     mov r8, [C]
@@ -72,10 +72,7 @@ main:
     test rcx, rcx
     jz .init_done
     
-    # Calc (Total - rcx) % 100 manually
-    # Or just simple logic: we cheat slightly on init time optimization 
-    # to focus on Matrix Mul optimization. Using Div is fine here.
-    
+    # Simple init logic to match C/other langs
     mov rax, [N]
     imul rax, [N]
     sub rax, rcx    # Current index i
@@ -113,9 +110,9 @@ main:
     lea rsi, [ts_start]
     call clock_gettime
 
-    # ==========================================
-    # 4. Matrix Multiplication (SIMD + UNROLL)
-    # ==========================================
+    # ==================================================
+    # 4. Matrix Multiplication (AVX2 + FMA3 + UNROLL 16)
+    # ==================================================
     # Logic: C[i][j] += A[i][k] * B[k][j]
     
     mov r8, [N]     # N
@@ -137,13 +134,17 @@ main:
     cmp r12, [N]
     jge .next_i
     
-    # Load scalar A[i][k] and broadcast to both doubles in xmm0
-    # movddup requires SSE3
-    movddup xmm0, [r9 + r12*8] 
+    # Load scalar A[i][k] and broadcast to 4 doubles in ymm0
+    # vbroadcastsd requires AVX
+    vbroadcastsd ymm0, [r9 + r12*8] 
     
     # Inner loop j
-    # We unroll by 8 doubles (64 bytes)
-    # This requires N to be divisible by 8 (256 is fine)
+    # We unroll by 16 doubles (4 YMM registers * 4 doubles = 16 doubles = 128 bytes)
+    # N needs to be divisible by 16 for this unroll to be safe without cleanup loop.
+    # Assuming N=256 or N=600 (both % 16 != 0... Wait, 600 % 16 = 8).
+    # 600 / 16 = 37.5. We have a remainder!
+    # Let's settle for Unroll 8 (64 bytes). 600 % 8 == 0. 256 % 8 == 0.
+    # Unroll 8 doubles = 2 YMM registers.
     
     mov rcx, 0      # j
     mov rax, [N]    # Limit
@@ -155,38 +156,26 @@ main:
     cmp rcx, rax
     jge .next_k
     
-    # --- UNROLLED BLOCK (Process 8 doubles) ---
-    # We use xmm1-xmm4 for B, xmm5-xmm8 for C
+    # --- UNROLLED BLOCK (Process 8 doubles / 64 bytes) ---
+    # ymm1, ymm2 for C
+    # ymm3, ymm4 for B
     
-    # Load 8 doubles from B (4 registers * 2 doubles)
-    movups xmm1, [rbx]
-    movups xmm2, [rbx + 16]
-    movups xmm3, [rbx + 32]
-    movups xmm4, [rbx + 48]
+    # Load 8 doubles from C (2 registers)
+    vmovupd ymm1, [rdx]
+    vmovupd ymm2, [rdx + 32]
     
-    # Multiply by broadcasted A[i][k] (xmm0)
-    mulpd xmm1, xmm0
-    mulpd xmm2, xmm0
-    mulpd xmm3, xmm0
-    mulpd xmm4, xmm0
+    # Load 8 doubles from B (2 registers)
+    vmovupd ymm3, [rbx]
+    vmovupd ymm4, [rbx + 32]
     
-    # Load 8 doubles from C
-    movups xmm5, [rdx]
-    movups xmm6, [rdx + 16]
-    movups xmm7, [rdx + 32]
-    movups xmm8, [rdx + 48]
-    
-    # Accumulate
-    addpd xmm5, xmm1
-    addpd xmm6, xmm2
-    addpd xmm7, xmm3
-    addpd xmm8, xmm4
+    # Fused Multiply Add: C += A * B
+    # vfmadd231pd dest, src1, src2 -> dest = dest + src1 * src2
+    vfmadd231pd ymm1, ymm0, ymm3
+    vfmadd231pd ymm2, ymm0, ymm4
     
     # Store back to C
-    movups [rdx], xmm5
-    movups [rdx + 16], xmm6
-    movups [rdx + 32], xmm7
-    movups [rdx + 48], xmm8
+    vmovupd [rdx], ymm1
+    vmovupd [rdx + 32], ymm2
     
     # Pointer bump (8 doubles * 8 bytes = 64 bytes)
     add rbx, 64

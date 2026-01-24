@@ -1,17 +1,19 @@
     .intel_syntax noprefix
-    .section .note.GNU-stack,"",@progbits
+
+    # Note: GNU-stack and Linux-specific sections will fail on macOS.
+    # This source is kept for Linux/Docker runs.
 
     .section .rodata
 str_sort_size:   .string "SORT_SIZE"
+str_data_file:   .string "data.bin"
+str_mode_rb:     .string "rb"
+str_err_open:    .string "Error: data.bin not found\n"
 str_output_head: .string "Sort(%d): "
 str_val_fmt:     .string "%.4f "
 str_dots:        .string "... "
 str_newline:     .string "\n"
 str_time:        .string "Time: %.3f ms\n"
 
-val_LCG_mul: .quad 1664525
-val_LCG_add: .quad 1013904223
-val_LCG_mod: .double 4294967296.0
 val_1000:    .double 1000.0
 val_1M:      .double 1000000.0
 
@@ -19,12 +21,13 @@ val_1M:      .double 1000000.0
     .align 32
 N:      .quad 0
 arr:    .quad 0
+fp:     .quad 0
 ts_start: .skip 16
 ts_end:   .skip 16
 
     .section .text
     .global main
-    .extern malloc, free, printf, clock_gettime, getenv, atoi
+    .extern malloc, free, printf, clock_gettime, getenv, atoi, fopen, fread, fclose, puts, exit
 
 main:
     push rbp
@@ -45,94 +48,70 @@ main:
 
 .alloc:
     mov rdi, [N]
-    shl rdi, 3      # N * 8 bytes
+    shl rdi, 3
     call malloc
     mov [arr], rax
 
-    # 2. LCG Generation
-    # seed (rax) = 42
-    # ptr (rdi) = arr
-    # i (rcx) = 0 to N
-    
+    # 2. Read data.bin
+    lea rdi, [str_data_file]
+    lea rsi, [str_mode_rb]
+    call fopen
+    test rax, rax
+    jz .open_error
+    mov [fp], rax
+
     mov rdi, [arr]
-    mov rcx, 0
-    mov rax, 42     # seed
-    mov r8, [val_LCG_mul]
-    mov r9, [val_LCG_add]
-    movsd xmm1, [val_LCG_mod]
+    mov rsi, 8
+    mov rdx, [N]
+    mov rcx, [fp]
+    call fread
+    
+    mov rdi, [fp]
+    call fclose
+    jmp .start_bench
 
-.gen_loop:
-    cmp rcx, [N]
-    jge .gen_done
-    
-    # seed = seed * mul + add
-    imul eax, r8d   # eax * mul
-    add eax, r9d    # + add
-    
-    # Convert unsigned int to double
-    mov ebx, eax    # zero extend to rbx
-    cvtsi2sd xmm0, rbx
-    divsd xmm0, xmm1 # / 2^32
-    
-    movsd [rdi + rcx*8], xmm0
-    
-    inc rcx
-    jmp .gen_loop
+.open_error:
+    lea rdi, [str_err_open]
+    call puts
+    mov rdi, 1
+    call exit
 
-.gen_done:
-
+.start_bench:
     # 3. Start Timer
     mov rdi, 1
     lea rsi, [ts_start]
     call clock_gettime
 
     # 4. Bubble Sort
-    # i in r8, j in r9
-    # limit_i = N - 1
-    # limit_j = N - i - 1
-    # ptr = [arr]
-    
-    mov r10, [arr]  # Base pointer
-    
-    mov r8, 0       # i = 0
+    mov r10, [arr]
+    mov r8, 0
     mov r11, [N]
-    dec r11         # N - 1
+    dec r11
 
 .outer_loop:
     cmp r8, r11
     jge .sort_done
-    
-    mov r9, 0       # j = 0
+    mov r9, 0
     mov r12, [N]
-    sub r12, r8     # N - i
-    dec r12         # N - i - 1
-    
+    sub r12, r8
+    dec r12
 .inner_loop:
     cmp r9, r12
     jge .next_outer
-    
-    # Compare arr[j] and arr[j+1]
-    # Address: r10 + j*8
-    movsd xmm0, [r10 + r9*8]     # arr[j]
-    movsd xmm1, [r10 + r9*8 + 8] # arr[j+1]
-    
+    movsd xmm0, [r10 + r9*8]
+    movsd xmm1, [r10 + r9*8 + 8]
     comisd xmm0, xmm1
-    jbe .no_swap    # if arr[j] <= arr[j+1] skip
-    
-    # Swap
+    jbe .no_swap
     movsd [r10 + r9*8], xmm1
     movsd [r10 + r9*8 + 8], xmm0
-    
 .no_swap:
     inc r9
     jmp .inner_loop
-
 .next_outer:
     inc r8
     jmp .outer_loop
 
 .sort_done:
-
     # 5. End Timer
     mov rdi, 1
     lea rsi, [ts_end]
@@ -148,7 +127,7 @@ main:
     cvtsi2sd xmm2, rax
     divsd xmm2, [val_1M]
     addsd xmm0, xmm2
-    movsd [rsp], xmm0   # save time
+    movsd [rsp], xmm0
 
     # 6. Print
     lea rdi, [str_output_head]
@@ -156,29 +135,33 @@ main:
     xor rax, rax
     call printf
     
-    # First 5
     mov rcx, 0
     mov rbx, [arr]
+    mov r12, 5
+    cmp r12, [N]
+    cmovg r12, [N]
 .p_loop1:
-    cmp rcx, 5
+    cmp rcx, r12
     jge .p_mid
     movsd xmm0, [rbx + rcx*8]
     lea rdi, [str_val_fmt]
     mov rax, 1
-    push rcx # save registers used by loop
+    push rcx
     push rbx
+    push r12
     call printf
+    pop r12
     pop rbx
     pop rcx
     inc rcx
     jmp .p_loop1
-
 .p_mid:
     lea rdi, [str_dots]
     xor rax, rax
     call printf
-    
-    # Last 5 (N-5 to N)
+    mov r12, [N]
+    cmp r12, 5
+    jle .p_end
     mov rcx, [N]
     sub rcx, 5
     mov rbx, [arr]
@@ -195,12 +178,10 @@ main:
     pop rcx
     inc rcx
     jmp .p_loop2
-
 .p_end:
     lea rdi, [str_newline]
     xor rax, rax
     call printf
-
     lea rdi, [str_time]
     movsd xmm0, [rsp]
     mov rax, 1
@@ -208,7 +189,6 @@ main:
 
     mov rdi, [arr]
     call free
-    
     add rsp, 48
     pop rbp
     xor rax, rax

@@ -9,12 +9,22 @@ int main() {
     if (n_env) N = atoi(n_env);
 
     double *arr = (double*)malloc(N * sizeof(double));
-    
-    // LCG Generator
-    uint32_t seed = 42;
-    for (int i = 0; i < N; i++) {
-        seed = (seed * 1664525 + 1013904223);
-        arr[i] = (double)seed / 4294967296.0;
+    if (!arr) { perror("malloc"); return 1; }
+
+    // Read from binary file
+    FILE *f = fopen("data.bin", "rb");
+    if (!f) {
+        fprintf(stderr, "Error: 'data.bin' not found. Run 'python3 tests/gen_data.py' first.\n");
+        free(arr);
+        return 1;
+    }
+    size_t read_count = fread(arr, sizeof(double), N, f);
+    fclose(f);
+
+    if (read_count < N) {
+        fprintf(stderr, "Warning: File contained fewer elements (%lu) than requested (%d).\n", read_count, N);
+        // We continue with what we read, or update N
+        N = read_count;
     }
 
     struct timespec start, end;
@@ -35,10 +45,12 @@ int main() {
     double time_ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_nsec - start.tv_nsec) / 1000000.0;
 
     printf("Sort(%d): ", N);
-    // Print verify check (first 5 and last 5)
-    for(int i=0; i<5; i++) printf("%.4f ", arr[i]);
+    int print_limit = (N < 5) ? N : 5;
+    for(int i=0; i<print_limit; i++) printf("%.4f ", arr[i]);
     printf("... ");
-    for(int i=N-5; i<N; i++) printf("%.4f ", arr[i]);
+    if (N > 5) {
+        for(int i=N-5; i<N; i++) printf("%.4f ", arr[i]);
+    }
     printf("\n");
     
     printf("Time: %.3f ms\n", time_ms);
