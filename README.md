@@ -14,14 +14,14 @@ Sorted by **Factorial** calculation time.
 <!-- BENCHMARK_BIGINT_START -->
 | Language | Factorial (5000) | Rel Speed | Fibonacci (25000) | Power (2^20000) | BigInt Type |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Go** | 9.234 ms | 1.00x | 44.194 ms | 0.235 ms | math/big |
-| **Python** | 19.953 ms | 2.16x | 39.748 ms | 0.149 ms | Native |
-| **Fortran** | 27.876 ms | 3.02x | 67.059 ms | 4.389 ms | Custom Base 10^9 |
-| **C** | 28.334 ms | 3.07x | 75.735 ms | 4.038 ms | Custom Base 10^9 |
-| **Rust** | 30.579 ms | 3.31x | 121.250 ms | 3.789 ms | Custom Base 10^9 |
-| **C++** | 33.250 ms | 3.60x | 107.861 ms | 4.232 ms | Custom Base 10^9 |
-| **JavaScript** | 47.517 ms | 5.15x | 54.436 ms | 0.341 ms | BigInt |
-| **Java** | 122.178 ms | 13.23x | 134.933 ms | 0.091 ms | BigInteger |
+| **Go** | 3.544 ms | 1.00x | 21.511 ms | 0.098 ms | math/big |
+| **Python** | 9.580 ms | 2.70x | 16.581 ms | 0.129 ms | Native |
+| **JavaScript** | 12.208 ms | 3.44x | 17.706 ms | 0.180 ms | BigInt |
+| **Fortran** | 13.201 ms | 3.72x | 26.293 ms | 1.667 ms | Custom Base 10^9 |
+| **Rust** | 13.515 ms | 3.81x | 46.069 ms | 1.657 ms | Custom Base 10^9 |
+| **C** | 14.513 ms | 4.10x | 31.588 ms | 1.911 ms | Custom Base 10^9 |
+| **C++** | 15.258 ms | 4.31x | 41.252 ms | 1.928 ms | Custom Base 10^9 |
+| **Java** | 52.706 ms | 14.87x | 62.121 ms | 0.030 ms | BigInteger |
 <!-- BENCHMARK_BIGINT_END -->
 
 ### 2. Native Float Throughput
@@ -32,14 +32,14 @@ Measuring raw CPU scalar performance and loop overhead.
 <!-- BENCHMARK_FLOAT_START -->
 | Language | Float Time (200k iter) | Rel Speed |
 | :--- | :--- | :--- |
-| **C++** | 725.0 ms | 1.00x |
-| **Rust** | 727.8 ms | 1.00x |
-| **C** | 741.2 ms | 1.02x |
-| **Go** | 838.0 ms | 1.16x |
-| **JavaScript** | 974.5 ms | 1.34x |
-| **Fortran** | 1075.8 ms | 1.48x |
-| **Python** | 46546.9 ms | 64.20x |
-| **Java** | — | — |
+| **Fortran** | 400.7 ms | 1.00x |
+| **Rust** | 405.4 ms | 1.01x |
+| **C** | 411.8 ms | 1.03x |
+| **Java** | 415.7 ms | 1.04x |
+| **C++** | 419.2 ms | 1.05x |
+| **Go** | 439.0 ms | 1.10x |
+| **JavaScript** | 459.3 ms | 1.15x |
+| **Python** | 25125.2 ms | 62.70x |
 <!-- BENCHMARK_FLOAT_END -->
 
 ### 3. Matrix Multiplication (Native Performance)
@@ -50,16 +50,15 @@ Sorted by **Raw Throughput**.
 <!-- BENCHMARK_MATRIX_START -->
 | Language | Matrix Mult (600x600) | Relative Speed |
 | :--- | :--- | :--- |
-| **Fortran** | 103.650 ms | 1.00x |
-| **Assembler** | 116.396 ms | 1.12x |
-| **C++** | 121.178 ms | 1.17x |
-| **C** | 136.074 ms | 1.31x |
-| **Rust** | 138.988 ms | 1.34x |
-| **Java** | 246.057 ms | 2.37x |
-| **Go** | 361.133 ms | 3.48x |
-| **JavaScript** | 647.985 ms | 6.25x |
-| **Python** | 32468.790 ms | 313.25x |
-
+| **Fortran** | 198.469 ms | 1.00x |
+| **Rust** | 203.847 ms | 1.03x |
+| **C++** | 204.089 ms | 1.03x |
+| **C** | 218.645 ms | 1.10x |
+| **Java** | 292.183 ms | 1.47x |
+| **Go** | 465.172 ms | 2.34x |
+| **JavaScript** | 881.002 ms | 4.44x |
+| **Python** | 51642.302 ms | 260.20x |
+| **Assembler** | — | — |
 <!-- BENCHMARK_MATRIX_END -->
 
 ### 4. Bubble Sort
@@ -70,16 +69,15 @@ A test of **branch prediction** and memory writes.
 <!-- BENCHMARK_SORT_START -->
 | Language | Bubble Sort (10000) | Relative Speed |
 | :--- | :--- | :--- |
-| **Rust** | 155.709 ms | 1.00x |
-| **Assembler** | 160.776 ms | 1.03x |
-| **Java** | 172.475 ms | 1.11x |
-| **Go** | 174.213 ms | 1.12x |
-| **JavaScript** | 213.616 ms | 1.37x |
-| **C** | 283.700 ms | 1.82x |
-| **Fortran** | 286.458 ms | 1.84x |
-| **C++** | 286.994 ms | 1.84x |
-| **Python** | 7217.864 ms | 46.35x |
-
+| **C++** | 189.788 ms | 1.00x |
+| **C** | 192.631 ms | 1.01x |
+| **Fortran** | 239.819 ms | 1.26x |
+| **Go** | 248.887 ms | 1.31x |
+| **Java** | 264.860 ms | 1.40x |
+| **Rust** | 282.065 ms | 1.49x |
+| **JavaScript** | 315.258 ms | 1.66x |
+| **Python** | 11104.985 ms | 58.51x |
+| **Assembler** | — | — |
 <!-- BENCHMARK_SORT_END -->
 
 ## Project Structure
