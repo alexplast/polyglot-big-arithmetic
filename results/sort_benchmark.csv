@@ -1,10 +1,10 @@
 Language,Sort Time (ms),Relative Speed
-Assembler,5.6900,1.00x
-Rust,6.1650,1.08x
-Go,6.5530,1.15x
-JavaScript,13.0230,2.29x
-Java,13.6300,2.40x
-C++,20.3330,3.57x
-C,20.3680,3.58x
-Fortran,20.4270,3.59x
-Python,371.9420,65.37x
+Assembler,4.2740,1.00x
+Rust,4.3810,1.03x
+Go,5.0740,1.19x
+JavaScript,11.3810,2.66x
+Java,11.7180,2.74x
+C++,15.6880,3.67x
+C,15.6890,3.67x
+Fortran,15.7580,3.69x
+Python,297.7230,69.66x
