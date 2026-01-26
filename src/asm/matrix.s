@@ -31,11 +31,16 @@ ts_end:   .skip 16
 main:
     push rbp
     mov rbp, rsp
-    # STACK ALIGNMENT FIX: 56 + 8 = 64 (Multiple of 16)
-    sub rsp, 56
+    
+    # --- STACK ALIGNMENT FIX ---
+    # Entry: RSP ends in 8.
+    # push rbp: RSP ends in 0 (Aligned 16).
+    # We need to allocate stack space and KEEP it aligned to 16 bytes.
+    # We use 64 bytes (multiple of 16).
+    sub rsp, 64
 
     # --- CHECK CPU FEATURES (AVX2) ---
-    push rbx          # CPUID clobbers RBX, must save
+    push rbx          # Preserved register
     mov eax, 1
     cpuid
     # Check AVX (ECX bit 28)
@@ -248,7 +253,7 @@ main:
     mov rdi, [B]; call free
     mov rdi, [C]; call free
 
-    add rsp, 56
+    add rsp, 64
     pop rbp
     xor rax, rax
     ret
