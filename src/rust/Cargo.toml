@@ -1,0 +1,20 @@
+[package]
+name = "polyglot_benchmark"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+num-bigint = "0.4"
+num-traits = "0.2"
+
+[[bin]]
+name = "factorial_lib"
+path = "factorial_lib.rs"
+
+[[bin]]
+name = "fibonacci_lib"
+path = "fibonacci_lib.rs"
+
+[[bin]]
+name = "power_lib"
+path = "power_lib.rs"

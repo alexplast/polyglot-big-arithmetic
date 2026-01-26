@@ -10,13 +10,21 @@ def calculate_power(base, exp):
     return pow(base, exp)
 
 def run_command(cmd, base, exp):
+    executable = cmd.split()[0]
+    if executable.startswith("./") and not os.path.exists(executable):
+        return None
+
     env = os.environ.copy()
     env["BASE"] = str(base)
     env["EXP"] = str(exp)
-    result = subprocess.run(cmd, env=env, capture_output=True, text=True, shell=True)
-    return result.stdout.strip()
+    try:
+        result = subprocess.run(cmd, env=env, capture_output=True, text=True, shell=True)
+        return result.stdout.strip()
+    except:
+        return None
 
 def get_result_from_output(output):
+    if not output: return None
     for line in output.split('\n'):
         if "Result" in line:
             return line.split(':')[-1].strip()
@@ -34,12 +42,14 @@ def verify():
     true_val = str(calculate_power(base, exp))
     
     languages = [
-        {"name": "C++", "cmd": "./bin/power/power_cpp"},
-        {"name": "Go", "cmd": "./bin/power/power_go"},
-        {"name": "Rust", "cmd": "./bin/power/power_rs"},
-        {"name": "Java", "cmd": "java -cp bin/power Power"},
-        {"name": "Fortran", "cmd": "./bin/power/power_f90"},
-        {"name": "Python", "cmd": "python3 src/python/power.py"},
+        {"name": "C++",        "cmd": "./bin/power/power_cpp"},
+        {"name": "C++ (GMP)",  "cmd": "./bin/power/power_cpp_gmp"},
+        {"name": "Go",         "cmd": "./bin/power/power_go"},
+        {"name": "Rust",       "cmd": "./bin/power/power_rs"},
+        {"name": "Rust (Lib)", "cmd": "./bin/power/power_rs_lib"},
+        {"name": "Java",       "cmd": "java -cp bin/power Power"},
+        {"name": "Fortran",    "cmd": "./bin/power/power_f90"},
+        {"name": "Python",     "cmd": "python3 src/python/power.py"},
         {"name": "JavaScript", "cmd": "node src/js/power.js"},
     ]
 
@@ -55,12 +65,9 @@ def verify():
         else:
             status = "FAILED"
             all_passed = False
-        
-        if status == "FAILED":
             print(f"[{lang['name']}] {status}")
-            print(f"  Expected: {true_val[:50]}...")
-            print(f"  Got:      {result[:50] if result else 'None'}...")
-        else:
+        
+        if status != "FAILED":
             print(f"[{lang['name']}] {status}")
 
     if all_passed:

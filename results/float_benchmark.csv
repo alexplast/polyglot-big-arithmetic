@@ -1,9 +1,9 @@
 Language,Float Time (50k iter),Relative Speed
-Rust,315.9770,1.00x
-Java,324.0320,1.03x
-Fortran,339.4050,1.07x
-JavaScript,349.2910,1.11x
-C++,427.0000,1.35x
-C,433.7940,1.37x
-Go,436.0000,1.38x
-Python,15755.8470,49.86x
+Rust,329.1340,1.00x
+Java,329.8500,1.00x
+Fortran,338.6730,1.03x
+C++,440.2150,1.34x
+C,440.8710,1.34x
+Go,441.0000,1.34x
+JavaScript,481.9050,1.46x
+Python,16735.1200,50.85x

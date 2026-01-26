@@ -37,12 +37,22 @@ def save_plot(filename):
     plt.close()
 
 def plot_horizontal(title, languages, times, filename, x_label="Time (ms)", log_scale=False):
-    plt.figure(figsize=(10, 6))
+    # 1. Filter out skipped tests (Time == 0) to avoid Log(0) errors and empty bars
+    valid_data = [(l, t) for l, t in zip(languages, times) if t > 0]
     
-    paired = sorted(zip(languages, times), key=lambda x: x[1], reverse=True)
+    if not valid_data:
+        print(f"[WARN] No valid data to plot for {title}")
+        return
+
+    # Sort by time (slowest on top, fastest on bottom usually, but here we reverse to put fastest on top if desired? 
+    # Actually standard is usually: Longest bars on top or bottom. 
+    # Let's keep logic: Sorted by time descending (Slowest at top, Fastest at bottom)
+    paired = sorted(valid_data, key=lambda x: x[1], reverse=True)
     langs = [p[0] for p in paired]
     vals = [p[1] for p in paired]
     colors = [COLORS.get(l, '#999999') for l in langs]
+    
+    plt.figure(figsize=(10, 6))
     
     bars = plt.barh(langs, vals, color=colors, height=0.6, zorder=3)
     
@@ -55,14 +65,20 @@ def plot_horizontal(title, languages, times, filename, x_label="Time (ms)", log_
         plt.gca().xaxis.set_major_formatter(ticker.ScalarFormatter())
         plt.gca().xaxis.set_minor_formatter(ticker.NullFormatter())
 
+    # Add text labels
     for bar in bars:
         width = bar.get_width()
+        # For log scale, placing text is tricky if the bar is very short, but standard logic works okay usually
         x_pos = width * 1.05 if log_scale else width + (max(vals) * 0.01)
         plt.text(x_pos, bar.get_y() + bar.get_height()/2, 
                  f"{width:.1f} ms", va='center', fontsize=9, fontweight='bold')
 
-    if not log_scale: plt.xlim(0, max(vals) * 1.15)
-    else: plt.xlim(right=max(vals) * 3)
+    # Set limits
+    if not log_scale: 
+        plt.xlim(0, max(vals) * 1.15)
+    else: 
+        # For log scale, ensure left limit is not 0 (matplotlib handles this, but good to be safe)
+        plt.xlim(right=max(vals) * 3)
 
     save_plot(filename)
 

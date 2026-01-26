@@ -1,19 +1,21 @@
 # Polyglot Benchmark Results
 
-Generated on: 2026-01-26 04:59:42
+Generated on: 2026-01-26 04:19:13
 
 ## BigInt Performance
 
 | Language | Factorial | Rel Speed | Fibonacci | Power | Type |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Go** | 6.298 ms | 1.00x | 38.863 ms | 0.160 ms | math/big |
-| **Python** | 8.026 ms | 1.27x | 14.013 ms | 0.058 ms | Native |
-| **Fortran** | 12.003 ms | 1.91x | 24.489 ms | 1.666 ms | Custom Base 10^9 |
-| **JavaScript** | 12.562 ms | 1.99x | 23.900 ms | 0.194 ms | BigInt |
-| **C** | 15.099 ms | 2.40x | 68.010 ms | 2.436 ms | Custom Base 10^9 |
-| **Rust** | 16.740 ms | 2.66x | 103.222 ms | 2.140 ms | Custom Base 10^9 |
-| **C++** | 26.556 ms | 4.22x | 116.724 ms | 1.902 ms | Custom Base 10^9 |
-| **Java** | 56.005 ms | 8.89x | 57.507 ms | 0.068 ms | BigInteger |
+| **C++ (GMP)** | 2.399 ms | 1.00x | 9.010 ms | 0.018 ms | GMP Lib |
+| **Rust (Lib)** | 2.483 ms | 1.04x | 10.249 ms | 0.023 ms | num-bigint |
+| **Go** | 4.425 ms | 1.84x | 23.721 ms | 0.135 ms | math/big |
+| **Python** | 8.870 ms | 3.70x | 12.227 ms | 0.057 ms | Native |
+| **JavaScript** | 11.303 ms | 4.71x | 17.923 ms | 0.192 ms | BigInt |
+| **Fortran** | 11.872 ms | 4.95x | 25.318 ms | 1.399 ms | Custom Base 10^9 |
+| **Rust** | 12.415 ms | 5.18x | 35.178 ms | 1.788 ms | Custom Base 10^9 |
+| **C** | 13.073 ms | 5.45x | 73.380 ms | 1.955 ms | Custom Base 10^9 |
+| **C++** | 16.971 ms | 7.07x | 32.735 ms | 1.732 ms | Custom Base 10^9 |
+| **Java** | 45.855 ms | 19.11x | 61.384 ms | 0.028 ms | BigInteger |
 
 
 ![BigInt Performance Graph](results/plots/bigint.png)
@@ -24,14 +26,14 @@ Generated on: 2026-01-26 04:59:42
 
 | Language | Time | Rel Speed |
 | :--- | :--- | :--- |
-| **Rust** | 315.977 ms | 1.00x |
-| **Java** | 324.032 ms | 1.03x |
-| **Fortran** | 339.405 ms | 1.07x |
-| **JavaScript** | 349.291 ms | 1.11x |
-| **C++** | 427.000 ms | 1.35x |
-| **C** | 433.794 ms | 1.37x |
-| **Go** | 436.000 ms | 1.38x |
-| **Python** | 15755.847 ms | 49.86x |
+| **Rust** | 329.134 ms | 1.00x |
+| **Java** | 329.850 ms | 1.00x |
+| **Fortran** | 338.673 ms | 1.03x |
+| **C++** | 440.215 ms | 1.34x |
+| **C** | 440.871 ms | 1.34x |
+| **Go** | 441.000 ms | 1.34x |
+| **JavaScript** | 481.905 ms | 1.46x |
+| **Python** | 16735.120 ms | 50.85x |
 
 
 ![Float Throughput Graph](results/plots/float.png)
@@ -42,14 +44,14 @@ Generated on: 2026-01-26 04:59:42
 
 | Language | Time | Rel Speed |
 | :--- | :--- | :--- |
-| **Fortran** | 3.249 ms | 1.00x |
-| **C** | 5.328 ms | 1.64x |
-| **C++** | 6.523 ms | 2.01x |
-| **Rust** | 7.356 ms | 2.26x |
-| **Go** | 17.286 ms | 5.32x |
-| **Java** | 26.448 ms | 8.14x |
-| **JavaScript** | 39.464 ms | 12.15x |
-| **Python** | 1164.536 ms | 358.43x |
+| **Fortran** | 4.493 ms | 1.00x |
+| **C** | 5.650 ms | 1.26x |
+| **Rust** | 6.853 ms | 1.53x |
+| **C++** | 8.464 ms | 1.88x |
+| **Go** | 15.472 ms | 3.44x |
+| **Java** | 24.403 ms | 5.43x |
+| **JavaScript** | 39.905 ms | 8.88x |
+| **Python** | 1210.352 ms | 269.39x |
 | **Assembler** | — | — |
 
 
@@ -61,15 +63,15 @@ Generated on: 2026-01-26 04:59:42
 
 | Language | Time | Rel Speed |
 | :--- | :--- | :--- |
-| **Assembler** | 14.204 ms | 1.00x |
-| **Go** | 14.698 ms | 1.03x |
-| **Rust** | 18.965 ms | 1.34x |
-| **JavaScript** | 21.064 ms | 1.48x |
-| **C++** | 22.529 ms | 1.59x |
-| **C** | 22.680 ms | 1.60x |
-| **Fortran** | 23.691 ms | 1.67x |
-| **Java** | 24.025 ms | 1.69x |
-| **Python** | 767.994 ms | 54.07x |
+| **Rust** | 11.851 ms | 1.00x |
+| **Go** | 12.617 ms | 1.06x |
+| **Assembler** | 13.896 ms | 1.17x |
+| **Fortran** | 22.374 ms | 1.89x |
+| **C++** | 22.383 ms | 1.89x |
+| **Java** | 23.445 ms | 1.98x |
+| **C** | 23.868 ms | 2.01x |
+| **JavaScript** | 28.326 ms | 2.39x |
+| **Python** | 731.614 ms | 61.73x |
 
 
 ![Bubble Sort Graph](results/plots/sort.png)

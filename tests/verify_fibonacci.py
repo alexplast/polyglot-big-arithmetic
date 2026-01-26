@@ -14,12 +14,20 @@ def calculate_fibonacci(n):
     return a
 
 def run_command(cmd, count):
+    executable = cmd.split()[0]
+    if executable.startswith("./") and not os.path.exists(executable):
+        return None
+
     env = os.environ.copy()
     env["COUNT"] = str(count)
-    result = subprocess.run(cmd, env=env, capture_output=True, text=True, shell=True)
-    return result.stdout.strip()
+    try:
+        result = subprocess.run(cmd, env=env, capture_output=True, text=True, shell=True)
+        return result.stdout.strip()
+    except:
+        return None
 
 def get_result_from_output(output):
+    if not output: return None
     for line in output.split('\n'):
         if "Result" in line:
             return line.split(':')[-1].strip()
@@ -33,12 +41,14 @@ def verify():
     true_val = str(calculate_fibonacci(count))
     
     languages = [
-        {"name": "C++", "cmd": "./bin/fibo/fibonacci_cpp"},
-        {"name": "Go", "cmd": "./bin/fibo/fibonacci_go"},
-        {"name": "Rust", "cmd": "./bin/fibo/fibonacci_rs"},
-        {"name": "Java", "cmd": "java -cp bin/fibo Fibonacci"},
-        {"name": "Fortran", "cmd": "./bin/fibo/fibonacci_f90"},
-        {"name": "Python", "cmd": "python3 src/python/fibonacci.py"},
+        {"name": "C++",        "cmd": "./bin/fibo/fibonacci_cpp"},
+        {"name": "C++ (GMP)",  "cmd": "./bin/fibo/fibonacci_cpp_gmp"},
+        {"name": "Go",         "cmd": "./bin/fibo/fibonacci_go"},
+        {"name": "Rust",       "cmd": "./bin/fibo/fibonacci_rs"},
+        {"name": "Rust (Lib)", "cmd": "./bin/fibo/fibonacci_rs_lib"},
+        {"name": "Java",       "cmd": "java -cp bin/fibo Fibonacci"},
+        {"name": "Fortran",    "cmd": "./bin/fibo/fibonacci_f90"},
+        {"name": "Python",     "cmd": "python3 src/python/fibonacci.py"},
         {"name": "JavaScript", "cmd": "node src/js/fibonacci.js"},
     ]
 
@@ -55,8 +65,6 @@ def verify():
         if status == "FAILED":
             all_passed = False
             print(f"[{lang['name']}] {status}")
-            print(f"  Expected: {expected[:50]}... (len={len(expected)})")
-            print(f"  Got:      {result[:50] if result else 'None'}... (len={len(result) if result else 0})")
         else:
             print(f"[{lang['name']}] {status} (N={count})")
 

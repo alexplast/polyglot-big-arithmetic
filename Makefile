@@ -2,13 +2,14 @@
 
 CXX = g++ -std=c++11
 CC = gcc
+DOCKER_IMG = polyglot-bench
 
 all: fibo fact power matrix float sort
 
 # --- Compile Groups ---
-fibo: bin_dirs cpp_fibo c_fibo go_fibo rust_fibo java_fibo fortran_fibo
-fact: bin_dirs cpp_fact c_fact go_fact rust_fact java_fact fortran_fact
-power: bin_dirs cpp_power c_power go_power rust_power java_power fortran_power
+fibo: bin_dirs cpp_fibo cpp_gmp_fibo c_fibo go_fibo rust_fibo rust_lib_fibo java_fibo fortran_fibo
+fact: bin_dirs cpp_fact cpp_gmp_fact c_fact go_fact rust_fact rust_lib_fact java_fact fortran_fact
+power: bin_dirs cpp_power cpp_gmp_power c_power go_power rust_power rust_lib_power java_power fortran_power
 matrix: bin_dirs cpp_matrix c_matrix asm_matrix go_matrix rust_matrix java_matrix fortran_matrix
 float: bin_dirs float_compile
 sort: bin_dirs sort_compile
@@ -28,7 +29,7 @@ sort_compile:
 	-gfortran -O3 src/fortran/bubble.f90 -o bin/sort/bubble_f90
 	-gcc -no-pie src/asm/bubble.s -o bin/sort/bubble_asm
 
-# --- Other Compiles ---
+# --- CPP Naive & GMP ---
 cpp_fibo: src/cpp/fibonacci.cpp
 	-$(CXX) -O3 src/cpp/fibonacci.cpp -o bin/fibo/fibonacci_cpp
 cpp_fact: src/cpp/factorial.cpp
@@ -38,6 +39,15 @@ cpp_power: src/cpp/power.cpp
 cpp_matrix: src/cpp/matrix.cpp
 	-$(CXX) -O3 src/cpp/matrix.cpp -o bin/matrix/matrix_cpp
 
+# GMP requires libgmp-dev installed and -lgmpxx -lgmp flags
+cpp_gmp_fibo: src/cpp/fibonacci_gmp.cpp
+	-$(CXX) -O3 src/cpp/fibonacci_gmp.cpp -o bin/fibo/fibonacci_cpp_gmp -lgmpxx -lgmp
+cpp_gmp_fact: src/cpp/factorial_gmp.cpp
+	-$(CXX) -O3 src/cpp/factorial_gmp.cpp -o bin/fact/factorial_cpp_gmp -lgmpxx -lgmp
+cpp_gmp_power: src/cpp/power_gmp.cpp
+	-$(CXX) -O3 src/cpp/power_gmp.cpp -o bin/power/power_cpp_gmp -lgmpxx -lgmp
+
+# --- C Compiles ---
 c_fibo: src/c/fibonacci.c
 	-$(CC) -O3 src/c/fibonacci.c -o bin/fibo/fibonacci_c
 c_fact: src/c/factorial.c
@@ -59,6 +69,7 @@ go_power: src/go/power.go
 go_matrix: src/go/matrix.go
 	-go build -o bin/matrix/matrix_go src/go/matrix.go
 
+# --- Rust Native ---
 rust_fibo: src/rust/fibonacci.rs
 	-rustc -C opt-level=3 src/rust/fibonacci.rs -o bin/fibo/fibonacci_rs
 rust_fact: src/rust/factorial.rs
@@ -67,6 +78,20 @@ rust_power: src/rust/power.rs
 	-rustc -C opt-level=3 src/rust/power.rs -o bin/power/power_rs
 rust_matrix: src/rust/matrix.rs
 	-rustc -C opt-level=3 src/rust/matrix.rs -o bin/matrix/matrix_rs
+
+# --- Rust Lib (Cargo) ---
+rust_lib_build: src/rust/Cargo.toml
+	@echo "Building Rust Libs with Cargo..."
+	cd src/rust && cargo build --release --quiet
+
+rust_lib_fibo: rust_lib_build
+	cp src/rust/target/release/fibonacci_lib bin/fibo/fibonacci_rs_lib
+
+rust_lib_fact: rust_lib_build
+	cp src/rust/target/release/factorial_lib bin/fact/factorial_rs_lib
+
+rust_lib_power: rust_lib_build
+	cp src/rust/target/release/power_lib bin/power/power_rs_lib
 
 java_fibo: src/java/Fibonacci.java
 	-javac -d bin/fibo src/java/Fibonacci.java
@@ -111,8 +136,55 @@ float_compile:
 data:
 	@python3 tests/gen_data.py
 
+test: all data
+	@echo "--- Verifying Implementations ---"
+	@python3 tests/verify_factorial.py
+	@python3 tests/verify_fibonacci.py
+	@python3 tests/verify_power.py
+
 bench_all: all data
 	@python3 tests/runner.py --bench all
 
 clean:
 	rm -rf bin results data.bin
+	rm -rf src/rust/target src/rust/Cargo.lock
+
+# --- Docker ---
+
+docker_build:
+	docker build -t $(DOCKER_IMG) .
+
+docker_run:
+	@echo "Running benchmark inside Docker container..."
+	@# We mount a named volume 'polyglot_cargo_cache' to persist crate downloads
+	docker run --rm \
+		-v "$(PWD)":/app \
+		-v polyglot_cargo_cache:/usr/local/cargo \
+		-w /app \
+		$(DOCKER_IMG) make bench_all
+
+docker_test:
+	@echo "Running verification inside Docker container..."
+	docker run --rm \
+		-v "$(PWD)":/app \
+		-v polyglot_cargo_cache:/usr/local/cargo \
+		-w /app \
+		$(DOCKER_IMG) make test
+
+docker_shell:
+	@echo "Starting shell inside Docker..."
+	docker run --rm -it \
+		-v "$(PWD)":/app \
+		-v polyglot_cargo_cache:/usr/local/cargo \
+		-w /app \
+		$(DOCKER_IMG) /bin/bash
+
+help:
+	@echo "Available commands:"
+	@echo "  make bench_all    - Run benchmarks locally"
+	@echo "  make test         - Run correctness verification locally"
+	@echo "  make docker_build - Build the Docker environment"
+	@echo "  make docker_run   - Run benchmarks inside Docker"
+	@echo "  make docker_test  - Run verification inside Docker"
+	@echo "  make docker_shell - Open a shell inside Docker"
+	@echo "  make clean        - Remove artifacts"

@@ -34,7 +34,9 @@ LANGS = {
     "asm":      {"name": "Assembler",  "type": "Native"},
     "c":        {"name": "C",          "type": "Custom Base 10^9"},
     "cpp":      {"name": "C++",        "type": "Custom Base 10^9"},
+    "cpp_gmp":  {"name": "C++ (GMP)",  "type": "GMP Lib"},
     "rust":     {"name": "Rust",       "type": "Custom Base 10^9"},
+    "rust_lib": {"name": "Rust (Lib)", "type": "num-bigint"},
     "go":       {"name": "Go",         "type": "math/big"},
     "java":     {"name": "Java",       "type": "BigInteger"},
     "js":       {"name": "JavaScript", "type": "BigInt"},
@@ -103,14 +105,16 @@ def append_report_section(title, markdown_table, image_filename):
 def run_bigint(runs):
     print(f"\n--- 1. BigInt Benchmark (Median of {runs} runs) ---")
     targets = [
-        ("C",          bin_cmd("fibo", "fibonacci", "c"),   bin_cmd("fact", "factorial", "c"),   bin_cmd("power", "power", "c")),
-        ("C++",        bin_cmd("fibo", "fibonacci", "cpp"), bin_cmd("fact", "factorial", "cpp"), bin_cmd("power", "power", "cpp")),
-        ("Rust",       bin_cmd("fibo", "fibonacci", "rs"),  bin_cmd("fact", "factorial", "rs"),  bin_cmd("power", "power", "rs")),
-        ("Go",         bin_cmd("fibo", "fibonacci", "go"),  bin_cmd("fact", "factorial", "go"),  bin_cmd("power", "power", "go")),
-        ("Java",       java_cmd("fibo", "Fibonacci"),       java_cmd("fact", "Factorial"),       java_cmd("power", "Power")),
-        ("Python",     py_cmd("fibonacci.py"),              py_cmd("factorial.py"),              py_cmd("power.py")),
-        ("JavaScript", js_cmd("fibonacci.js"),              js_cmd("factorial.js"),              js_cmd("power.js")),
-        ("Fortran",    bin_cmd("fibo", "fibonacci", "f90"), bin_cmd("fact", "factorial", "f90"), bin_cmd("power", "power", "f90")),
+        ("C",          bin_cmd("fibo", "fibonacci", "c"),      bin_cmd("fact", "factorial", "c"),      bin_cmd("power", "power", "c")),
+        ("C++",        bin_cmd("fibo", "fibonacci", "cpp"),    bin_cmd("fact", "factorial", "cpp"),    bin_cmd("power", "power", "cpp")),
+        ("C++ (GMP)",  bin_cmd("fibo", "fibonacci", "cpp_gmp"),bin_cmd("fact", "factorial", "cpp_gmp"),bin_cmd("power", "power", "cpp_gmp")),
+        ("Rust",       bin_cmd("fibo", "fibonacci", "rs"),     bin_cmd("fact", "factorial", "rs"),     bin_cmd("power", "power", "rs")),
+        ("Rust (Lib)", bin_cmd("fibo", "fibonacci", "rs_lib"), bin_cmd("fact", "factorial", "rs_lib"), bin_cmd("power", "power", "rs_lib")),
+        ("Go",         bin_cmd("fibo", "fibonacci", "go"),     bin_cmd("fact", "factorial", "go"),     bin_cmd("power", "power", "go")),
+        ("Java",       java_cmd("fibo", "Fibonacci"),          java_cmd("fact", "Factorial"),          java_cmd("power", "Power")),
+        ("Python",     py_cmd("fibonacci.py"),                 py_cmd("factorial.py"),                 py_cmd("power.py")),
+        ("JavaScript", js_cmd("fibonacci.js"),                 js_cmd("factorial.js"),                 js_cmd("power.js")),
+        ("Fortran",    bin_cmd("fibo", "fibonacci", "f90"),    bin_cmd("fact", "factorial", "f90"),    bin_cmd("power", "power", "f90")),
     ]
     results = []
     env_fib = {"COUNT": DEFAULTS["bigint"]["fib"]}

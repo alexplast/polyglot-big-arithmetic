@@ -12,66 +12,65 @@ The core objective is to compare how different languages handle large numbers, m
 The benchmark performs the following tests:
 
 1.  **Arbitrary Precision (BigInt)**:
-    *   Calculates Factorial (5000!), Fibonacci (25000th), and Power ($2^{20000}$).
-    *   Compares native BigInt libraries (Go, Java, Python, JS) vs Custom implementations (C, C++, Rust, Fortran).
+    *   Calculates Factorial (5000!), Fibonacci (25000th), and Power (2^20000).
+    *   **Native/Lib**: Go (`math/big`), Java (`BigInteger`), Python, JS, **C++ (GMP)**, **Rust (num-bigint)**.
+    *   **Custom (Naive)**: C, C++, Rust, Fortran (Base 10^9 implementation).
 2.  **Float Throughput**:
     *   Measures raw CPU scalar loop performance (Fibonacci float loop).
 3.  **Matrix Multiplication**:
-    *   Multiplies two $200 \times 200$ matrices.
+    *   Multiplies two 200x200 matrices.
     *   Tests vectorization (SIMD) and memory cache efficiency.
+    *   Includes **AVX2 Assembly** implementation.
 4.  **Bubble Sort**:
-    *   Sorts an array of 3,000 random doubles.
+    *   Sorts an array of 3,000 random doubles read from a binary file.
     *   Tests branch prediction and memory write speeds.
 
 ---
 
 ## 🛠 Project Structure
 
-```text
-.
-├── Makefile            # Central build and run system
-├── RESULTS.md          # Generated benchmark report with charts
-├── README.md           # This file
-├── bin/                # Compiled executables (ignored by git)
-├── results/            # CSV data and PNG plots
-├── src/                # Source code organized by language
-│   ├── asm/            # Hand-written x64 Assembly (AVX2 optimized)
-│   ├── c/              # C implementations
-│   ├── cpp/            # C++ implementations
-│   ├── fortran/        # Fortran implementations
-│   ├── go/             # Go implementations
-│   ├── java/           # Java implementations
-│   ├── js/             # JavaScript (Node.js)
-│   ├── python/         # Python scripts
-│   └── rust/           # Rust implementations
-└── tests/              # Benchmark runners and plot generators
-```
+    .
+    ├── .github/            # CI/CD workflows
+    ├── Dockerfile          # Environment definition
+    ├── Makefile            # Central build and run system
+    ├── RESULTS.md          # Generated benchmark report with charts
+    ├── bin/                # Compiled executables (ignored by git)
+    ├── results/            # CSV data and PNG plots
+    ├── src/                # Source code organized by language
+    └── tests/              # Benchmark runners and verifiers
 
 ## 🚀 Building and Running
 
-### Prerequisites
-*   **Compilers**: GCC, G++, GFortran, Rustc, Go, Javac.
-*   **Interpreters**: Python 3, Node.js.
-*   **Python Libs**: `matplotlib` (for plotting).
+### Option 1: Running with Docker (Recommended)
 
-### Commands
+This is the easiest way to run the benchmarks without installing 9 different compilers and libraries (like GMP) on your machine.
 
-*   **Run Everything**:
-    Compiles all sources, generates test data, runs benchmarks, and updates `RESULTS.md`.
-    ```bash
-    make bench_all
-    ```
+1.  **Build the image** (once):
+
+        make docker_build
+
+2.  **Run Verification (Tests)**:
+
+        make docker_test
+
+3.  **Run Benchmarks**:
+
+        make docker_run
+
+    *Results will be saved to `RESULTS.md` and `results/plots/`.*
+
+### Option 2: Running Locally
+
+**Prerequisites**: GCC, G++, GFortran, Rustc (cargo), Go, JDK 21+, Python 3, Node.js 22+, `libgmp-dev`.
+
+*   **Verify Correctness**:
+
+        make test
+
+*   **Run Benchmarks**:
+
+        make bench_all
 
 *   **Clean**:
-    Removes binaries and temporary data.
-    ```bash
-    make clean
-    ```
 
-*   **Specific Tests**:
-    You can run specific groups via `make`:
-    ```bash
-    make fibo      # Compile Fibonacci tests
-    make matrix    # Compile Matrix tests
-    # ... etc
-    ```
+        make clean

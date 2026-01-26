@@ -21,3 +21,7 @@ Thumbs.db
 # IDEs
 .vscode/
 .idea/
+
+# Rust Cargo artifacts
+src/rust/target/
+src/rust/Cargo.lock

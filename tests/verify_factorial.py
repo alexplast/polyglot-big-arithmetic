@@ -11,12 +11,21 @@ def calculate_factorial(n):
     return math.factorial(n)
 
 def run_command(cmd, count):
+    # Fix: Only check file existence for local binaries, not system commands (java, python, node)
+    executable = cmd.split()[0]
+    if executable.startswith("./") and not os.path.exists(executable):
+        return None 
+    
     env = os.environ.copy()
     env["COUNT"] = str(count)
-    result = subprocess.run(cmd, env=env, capture_output=True, text=True, shell=True)
-    return result.stdout.strip()
+    try:
+        result = subprocess.run(cmd, env=env, capture_output=True, text=True, shell=True)
+        return result.stdout.strip()
+    except Exception:
+        return None
 
 def get_result_from_output(output):
+    if not output: return None
     for line in output.split('\n'):
         if "Result" in line:
             return line.split(':')[-1].strip()
@@ -30,13 +39,15 @@ def verify():
     true_val = str(calculate_factorial(count))
     
     languages = [
-        {"name": "C++", "cmd": "./bin/fact/factorial_cpp", "is_fixed": False},
-        {"name": "Go", "cmd": "./bin/fact/factorial_go", "is_fixed": False},
-        {"name": "Rust", "cmd": "./bin/fact/factorial_rs", "is_fixed": False},
-        {"name": "Java", "cmd": "java -cp bin/fact Factorial", "is_fixed": False},
-        {"name": "Fortran", "cmd": "./bin/fact/factorial_f90", "is_fixed": False},
-        {"name": "Python", "cmd": "python3 src/python/factorial.py", "is_fixed": False},
-        {"name": "JavaScript", "cmd": "node src/js/factorial.js", "is_fixed": False},
+        {"name": "C++",        "cmd": "./bin/fact/factorial_cpp",     "is_fixed": False},
+        {"name": "C++ (GMP)",  "cmd": "./bin/fact/factorial_cpp_gmp", "is_fixed": False},
+        {"name": "Go",         "cmd": "./bin/fact/factorial_go",      "is_fixed": False},
+        {"name": "Rust",       "cmd": "./bin/fact/factorial_rs",      "is_fixed": False},
+        {"name": "Rust (Lib)", "cmd": "./bin/fact/factorial_rs_lib",  "is_fixed": False},
+        {"name": "Java",       "cmd": "java -cp bin/fact Factorial",  "is_fixed": False},
+        {"name": "Fortran",    "cmd": "./bin/fact/factorial_f90",     "is_fixed": False},
+        {"name": "Python",     "cmd": "python3 src/python/factorial.py", "is_fixed": False},
+        {"name": "JavaScript", "cmd": "node src/js/factorial.js",     "is_fixed": False},
     ]
 
     print(f"--- Verifying Factorial up to {count} ---")
@@ -58,8 +69,8 @@ def verify():
         if status == "FAILED":
             all_passed = False
             print(f"[{lang['name']}] {status}")
-            print(f"  Expected: {expected[:50]}...")
-            print(f"  Got:      {result[:50] if result else 'None'}...")
+            # print(f"  Expected: {expected[:50]}...") # Uncomment for debug
+            # print(f"  Got:      {result[:50] if result else 'None'}...")
         else:
             print(f"[{lang['name']}] {status} (N={target_count})")
 
