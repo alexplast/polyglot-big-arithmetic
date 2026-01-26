@@ -1,11 +1,11 @@
 Language,Factorial Time (ms),Relative Speed,Fibonacci Time (ms),Power Time (ms),Implementation Type
-C++ (GMP),2.3990,1.00x,9.0100,0.0180,GMP Lib
-Rust (Lib),2.4830,1.04x,10.2490,0.0230,num-bigint
-Go,4.4250,1.84x,23.7210,0.1350,math/big
-Python,8.8700,3.70x,12.2270,0.0570,Native
-JavaScript,11.3030,4.71x,17.9230,0.1920,BigInt
-Fortran,11.8720,4.95x,25.3180,1.3990,Custom Base 10^9
-Rust,12.4150,5.18x,35.1780,1.7880,Custom Base 10^9
-C,13.0730,5.45x,73.3800,1.9550,Custom Base 10^9
-C++,16.9710,7.07x,32.7350,1.7320,Custom Base 10^9
-Java,45.8550,19.11x,61.3840,0.0280,BigInteger
+Rust (Lib),1.5330,1.00x,3.5870,0.0060,num-bigint
+C++ (GMP),1.6820,1.10x,3.5220,0.0050,GMP Lib
+Go,1.8750,1.22x,6.7290,0.0170,math/big
+Python,4.2740,2.79x,6.0740,0.0350,Native
+JavaScript,5.6220,3.67x,6.8890,0.0880,BigInt
+C,9.2530,6.04x,43.4130,1.3880,Custom Base 10^9
+Rust,9.2750,6.05x,27.7160,1.2010,Custom Base 10^9
+C++,9.2850,6.06x,21.0050,1.0560,Custom Base 10^9
+Fortran,9.2940,6.06x,17.4750,1.0810,Custom Base 10^9
+Java,18.5780,12.12x,17.9050,0.0180,BigInteger
