@@ -9,11 +9,14 @@ The core objective is to compare how different languages handle large numbers, m
 
 **👉 [CLICK HERE TO VIEW FULL BENCHMARK RESULTS & GRAPHS](RESULTS.md)**
 
+*Note: Results are automatically updated by GitHub Actions on every push.*
+
 The benchmark performs the following tests:
 
 1.  **Arbitrary Precision (BigInt)**:
     *   Calculates Factorial (5000!), Fibonacci (25000th), and Power (2^20000).
-    *   **Native/Lib**: Go (`math/big`), Java (`BigInteger`), Python, JS, **C++ (GMP)**, **Rust (num-bigint)**.
+    *   **External Libs**: C++ (`GMP`), Rust (`num-bigint`).
+    *   **Native Libs**: Go (`math/big`), Java (`BigInteger`), Python, JS.
     *   **Custom (Naive)**: C, C++, Rust, Fortran (Base 10^9 implementation).
 2.  **Float Throughput**:
     *   Measures raw CPU scalar loop performance (Fibonacci float loop).
@@ -30,8 +33,8 @@ The benchmark performs the following tests:
 ## 🛠 Project Structure
 
     .
-    ├── .github/            # CI/CD workflows
-    ├── Dockerfile          # Environment definition
+    ├── .github/            # CI/CD workflows (Auto-benchmark)
+    ├── Dockerfile          # Environment definition (Ubuntu 24.04 + GMP)
     ├── Makefile            # Central build and run system
     ├── RESULTS.md          # Generated benchmark report with charts
     ├── bin/                # Compiled executables (ignored by git)
@@ -43,9 +46,9 @@ The benchmark performs the following tests:
 
 ### Option 1: Running with Docker (Recommended)
 
-This is the easiest way to run the benchmarks without installing 9 different compilers and libraries (like GMP) on your machine.
+This is the easiest way to run the benchmarks without installing 9 different compilers and libraries on your machine.
 
-1.  **Build the image** (once):
+1.  **Build the image** (cached):
 
         make docker_build
 

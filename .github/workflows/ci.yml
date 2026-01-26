@@ -3,8 +3,15 @@ name: CI
 on:
   push:
     branches: [ "master" ]
+    paths-ignore:
+      - 'RESULTS.md'
+      - 'results/**'
   pull_request:
     branches: [ "master" ]
+
+# Разрешаем workflow пушить изменения в репозиторий
+permissions:
+  contents: write
 
 jobs:
   benchmark:
@@ -14,34 +21,44 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # Настройка Docker Buildx для продвинутого кэширования
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Cache Docker layers
-      uses: actions/cache@v3
+    # Сборка образа с использованием кэша GitHub Actions
+    # --load загружает образ в локальный докер, чтобы его можно было использовать в 'docker run'
+    - name: Build Docker Image with Cache
+      uses: docker/build-push-action@v5
       with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+        context: .
+        load: true
+        tags: polyglot-bench:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
-    - name: Build Docker Image
-      run: |
-        make docker_build
-
-    - name: Run Verification (Test)
+    # Запуск верификации (тесты корректности)
+    - name: Run Verification
       run: |
         make docker_test
 
+    # Запуск бенчмарков (генерирует файлы)
     - name: Run Benchmarks
       run: |
         make docker_run
 
-    - name: Upload Results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: benchmark-results
-        path: |
-          RESULTS.md
-          results/
+    # Коммит результатов обратно в репозиторий
+    - name: Commit and Push Results
+      if: github.event_name == 'push'  # Только для пушей, не для PR
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Проверяем, есть ли изменения в результатах
+        if [[ -n $(git status --porcelain results/ RESULTS.md) ]]; then
+          echo "Changes detected in benchmark results. Committing..."
+          git add RESULTS.md results/
+          git commit -m "Update benchmark results [skip ci]"
+          git push
+        else
+          echo "No changes in benchmark results."
+        fi
