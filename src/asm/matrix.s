@@ -8,6 +8,7 @@ str_matrix_size: .string "MATRIX_SIZE"
 str_output_header: .string "Matrix(%dx%d)\n"
 str_output_res:    .string "Result[0]: %.4f\n"
 str_output_time:   .string "Time: %.3f ms\n"
+str_err_avx:       .string "Error: AVX2 instruction set not supported by CPU\n"
 
 val_1_0:  .double 1.0
 val_0_01: .double 0.01
@@ -25,12 +26,32 @@ ts_end:   .skip 16
 
     .section .text
     .global main
-    .extern malloc, free, printf, clock_gettime, getenv, atoi
+    .extern malloc, free, printf, clock_gettime, getenv, atoi, puts, exit
 
 main:
     push rbp
     mov rbp, rsp
-    sub rsp, 48
+    # STACK ALIGNMENT FIX: 56 + 8 = 64 (Multiple of 16)
+    sub rsp, 56
+
+    # --- CHECK CPU FEATURES (AVX2) ---
+    push rbx          # CPUID clobbers RBX, must save
+    mov eax, 1
+    cpuid
+    # Check AVX (ECX bit 28)
+    and ecx, 0x18000000
+    cmp ecx, 0x18000000
+    jne .no_avx
+
+    # Check AVX2 (Leaf 7, EBX bit 5)
+    mov eax, 7
+    mov ecx, 0
+    cpuid
+    test ebx, 0x20
+    jz .no_avx
+    
+    pop rbx
+    # --- END CHECK ---
 
     # 1. Get MATRIX_SIZE
     lea rdi, [str_matrix_size]
@@ -111,7 +132,7 @@ main:
     call clock_gettime
 
     # ==================================================
-    # 4. Matrix Multiplication (AVX2 + FMA3 + UNROLL 16)
+    # 4. Matrix Multiplication (AVX2 + FMA3 + UNROLL 8)
     # ==================================================
     # Logic: C[i][j] += A[i][k] * B[k][j]
     
@@ -135,16 +156,7 @@ main:
     jge .next_i
     
     # Load scalar A[i][k] and broadcast to 4 doubles in ymm0
-    # vbroadcastsd requires AVX
     vbroadcastsd ymm0, [r9 + r12*8] 
-    
-    # Inner loop j
-    # We unroll by 16 doubles (4 YMM registers * 4 doubles = 16 doubles = 128 bytes)
-    # N needs to be divisible by 16 for this unroll to be safe without cleanup loop.
-    # Assuming N=256 or N=600 (both % 16 != 0... Wait, 600 % 16 = 8).
-    # 600 / 16 = 37.5. We have a remainder!
-    # Let's settle for Unroll 8 (64 bytes). 600 % 8 == 0. 256 % 8 == 0.
-    # Unroll 8 doubles = 2 YMM registers.
     
     mov rcx, 0      # j
     mov rax, [N]    # Limit
@@ -169,7 +181,6 @@ main:
     vmovupd ymm4, [rbx + 32]
     
     # Fused Multiply Add: C += A * B
-    # vfmadd231pd dest, src1, src2 -> dest = dest + src1 * src2
     vfmadd231pd ymm1, ymm0, ymm3
     vfmadd231pd ymm2, ymm0, ymm4
     
@@ -237,7 +248,14 @@ main:
     mov rdi, [B]; call free
     mov rdi, [C]; call free
 
-    add rsp, 48
+    add rsp, 56
     pop rbp
     xor rax, rax
     ret
+
+.no_avx:
+    pop rbx
+    lea rdi, [str_err_avx]
+    call puts
+    mov rdi, 1
+    call exit

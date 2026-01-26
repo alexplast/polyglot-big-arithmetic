@@ -30,9 +30,19 @@ ts_end:   .skip 16
     .extern malloc, free, printf, clock_gettime, getenv, atoi, fopen, fread, fclose, puts, exit
 
 main:
-    push rbp
+    # --- PROLOGUE & ABI COMPLIANCE ---
+    # Stack checking: Entry RSP ends in 0x8 (return address pushed)
+    push rbp        # RSP -> 0x0
     mov rbp, rsp
-    sub rsp, 48
+    
+    # Save Callee-Saved Registers
+    push rbx        # RSP -> 0x8
+    push r12        # RSP -> 0x0
+    push r13        # RSP -> 0x8  <-- New: Use R13 for loop counter
+    
+    # Align Stack to 16 bytes
+    # Current RSP ends in 0x8. We need to subtract 8 to get to 0x0.
+    sub rsp, 8      # RSP -> 0x0 (ALIGNED). We use this 8 bytes for double storage.
 
     # 1. Env SORT_SIZE
     lea rdi, [str_sort_size]
@@ -127,7 +137,7 @@ main:
     cvtsi2sd xmm2, rax
     divsd xmm2, [val_1M]
     addsd xmm0, xmm2
-    movsd [rsp], xmm0
+    movsd [rsp], xmm0  # Store time in stack scratch space
 
     # 6. Print
     lea rdi, [str_output_head]
@@ -135,25 +145,21 @@ main:
     xor rax, rax
     call printf
     
-    mov rcx, 0
+    # Use R13 as loop counter instead of RCX (RCX is volatile)
+    mov r13, 0
     mov rbx, [arr]
     mov r12, 5
     cmp r12, [N]
     cmovg r12, [N]
 .p_loop1:
-    cmp rcx, r12
+    cmp r13, r12
     jge .p_mid
-    movsd xmm0, [rbx + rcx*8]
+    movsd xmm0, [rbx + r13*8]
     lea rdi, [str_val_fmt]
     mov rax, 1
-    push rcx
-    push rbx
-    push r12
+    # Stack is already aligned (rsp ends in 0). No pushes needed.
     call printf
-    pop r12
-    pop rbx
-    pop rcx
-    inc rcx
+    inc r13
     jmp .p_loop1
 .p_mid:
     lea rdi, [str_dots]
@@ -162,21 +168,17 @@ main:
     mov r12, [N]
     cmp r12, 5
     jle .p_end
-    mov rcx, [N]
-    sub rcx, 5
+    mov r13, [N]
+    sub r13, 5
     mov rbx, [arr]
 .p_loop2:
-    cmp rcx, [N]
+    cmp r13, [N]
     jge .p_end
-    movsd xmm0, [rbx + rcx*8]
+    movsd xmm0, [rbx + r13*8]
     lea rdi, [str_val_fmt]
     mov rax, 1
-    push rcx
-    push rbx
     call printf
-    pop rbx
-    pop rcx
-    inc rcx
+    inc r13
     jmp .p_loop2
 .p_end:
     lea rdi, [str_newline]
@@ -189,7 +191,12 @@ main:
 
     mov rdi, [arr]
     call free
-    add rsp, 48
+    
+    # --- EPILOGUE ---
+    add rsp, 8
+    pop r13
+    pop r12
+    pop rbx
     pop rbp
     xor rax, rax
     ret

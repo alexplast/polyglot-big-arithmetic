@@ -14,107 +14,85 @@ RESULTS_DIR = "results"
 PLOTS_DIR = os.path.join(RESULTS_DIR, "plots")
 
 COLORS = {
-    'Assembler': '#2c3e50', # Dark Blue
-    'C':         '#34495e', # Blue Grey
-    'C++':       '#0055ff', # Blue
-    'Rust':      '#dea584', # Rust color
-    'Go':        '#00add8', # Cyan
-    'Java':      '#b07219', # Brown/Orange
-    'JavaScript':'#f1e05a', # Yellow
-    'Fortran':   '#734f96', # Purple
-    'Python':    '#3572A5', # Python Blue
+    'Assembler': '#2c3e50', 'C': '#555555', 'C++': '#00599C',
+    'Rust': '#dea584', 'Go': '#00add8', 'Java': '#b07219',
+    'JavaScript':'#f1e05a', 'Fortran': '#734f96', 'Python': '#3572A5',
 }
 
 def load_data(filename):
     path = os.path.join(RESULTS_DIR, filename)
-    if not os.path.exists(path):
-        print(f"[WARN] {filename} not found, skipping plot.")
-        return []
-    
+    if not os.path.exists(path): return []
     data = []
     with open(path, 'r') as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            data.append(row)
+        for row in reader: data.append(row)
     return data
 
 def save_plot(filename):
     os.makedirs(PLOTS_DIR, exist_ok=True)
     path = os.path.join(PLOTS_DIR, filename)
-    plt.savefig(path, bbox_inches='tight', dpi=150)
-    print(f"[SUCCESS] Saved chart to {path}")
+    # Use bbox_inches='tight' instead of tight_layout to handle labels safely
+    plt.savefig(path, dpi=100, bbox_inches='tight')
+    print(f"Generated plot: {path}")
     plt.close()
 
-def plot_bar(title, languages, times, filename, y_label="Time (ms)", log_scale=False):
+def plot_horizontal(title, languages, times, filename, x_label="Time (ms)", log_scale=False):
     plt.figure(figsize=(10, 6))
     
-    # Sort data
-    paired = sorted(zip(languages, times), key=lambda x: x[1])
+    paired = sorted(zip(languages, times), key=lambda x: x[1], reverse=True)
     langs = [p[0] for p in paired]
     vals = [p[1] for p in paired]
+    colors = [COLORS.get(l, '#999999') for l in langs]
     
-    # Colors
-    bars_colors = [COLORS.get(l, '#95a5a6') for l in langs]
+    bars = plt.barh(langs, vals, color=colors, height=0.6, zorder=3)
     
-    bars = plt.bar(langs, vals, color=bars_colors, zorder=3)
-    
-    plt.title(title, fontsize=14, pad=20)
-    plt.ylabel(y_label, fontsize=12)
-    plt.grid(axis='y', linestyle='--', alpha=0.7, zorder=0)
+    plt.title(title, fontsize=14, pad=15)
+    plt.xlabel(x_label, fontsize=11)
+    plt.grid(axis='x', linestyle='--', alpha=0.5, zorder=0)
     
     if log_scale:
-        plt.yscale('log')
-        plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter())
-    
-    # Add values on top of bars
-    for bar in bars:
-        height = bar.get_height()
-        label = f"{height:.1f}"
-        if height > 1000:
-             label = f"{height/1000:.2f}s"
-             
-        y_pos = height
-        if log_scale:
-            y_pos = height * 1.1
-        else:
-            y_pos = height + (max(vals)*0.01)
+        plt.xscale('log')
+        plt.gca().xaxis.set_major_formatter(ticker.ScalarFormatter())
+        plt.gca().xaxis.set_minor_formatter(ticker.NullFormatter())
 
-        plt.text(bar.get_x() + bar.get_width()/2., y_pos,
-                 label,
-                 ha='center', va='bottom', fontsize=9, rotation=0)
+    for bar in bars:
+        width = bar.get_width()
+        x_pos = width * 1.05 if log_scale else width + (max(vals) * 0.01)
+        plt.text(x_pos, bar.get_y() + bar.get_height()/2, 
+                 f"{width:.1f} ms", va='center', fontsize=9, fontweight='bold')
+
+    if not log_scale: plt.xlim(0, max(vals) * 1.15)
+    else: plt.xlim(right=max(vals) * 3)
 
     save_plot(filename)
 
 def run_plotting():
-    # 1. BigInt
     data = load_data("bigint_benchmark.csv")
     if data:
-        langs = [d['Language'] for d in data]
-        # Parse floats
-        times = [float(d['Factorial Time (ms)']) for d in data]
-        plot_bar("BigInt Factorial (Lower is Better)", langs, times, "bigint_factorial.png")
+        plot_horizontal("BigInt: Factorial Calc (Lower is Better)", 
+                        [d['Language'] for d in data], 
+                        [float(d['Factorial Time (ms)']) for d in data], "bigint.png")
 
-    # 2. Float
     data = load_data("float_benchmark.csv")
     if data:
-        langs = [d['Language'] for d in data]
-        times = [float(d['Float Time (ms)']) for d in data]
-        # Use log scale because Python is usually way slower
-        plot_bar("Float Throughput (Lower is Better)", langs, times, "float_throughput.png", log_scale=True)
+        key = [k for k in data[0].keys() if 'Float Time' in k][0]
+        plot_horizontal("Float Math Throughput (Lower is Better)", 
+                        [d['Language'] for d in data], 
+                        [float(d[key]) for d in data], "float.png")
 
-    # 3. Matrix
     data = load_data("matrix_benchmark.csv")
     if data:
-        langs = [d['Language'] for d in data]
-        times = [float(d['Matrix Time (ms)']) for d in data]
-        plot_bar("Matrix Multiplication (Lower is Better)", langs, times, "matrix_mult.png", log_scale=True)
+        key = [k for k in data[0].keys() if 'Time' in k][0]
+        plot_horizontal("Matrix Multiplication (Lower is Better)", 
+                        [d['Language'] for d in data], 
+                        [float(d[key]) for d in data], "matrix.png", log_scale=True)
 
-    # 4. Sort
     data = load_data("sort_benchmark.csv")
     if data:
-        langs = [d['Language'] for d in data]
-        times = [float(d['Sort Time (ms)']) for d in data]
-        plot_bar("Bubble Sort (Lower is Better)", langs, times, "bubble_sort.png", log_scale=True)
+        key = [k for k in data[0].keys() if 'Time' in k][0]
+        plot_horizontal("Bubble Sort (Lower is Better)", 
+                        [d['Language'] for d in data], 
+                        [float(d[key]) for d in data], "sort.png", log_scale=True)
 
 if __name__ == "__main__":
     run_plotting()

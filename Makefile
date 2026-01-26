@@ -107,8 +107,12 @@ float_compile:
 	-gfortran -O3 src/fortran/power_float.f90 -o bin/float/power/power_f90
 
 # --- Runners ---
-bench_all: all
+
+data:
+	@python3 tests/gen_data.py
+
+bench_all: all data
 	@python3 tests/runner.py --bench all
 
 clean:
-	rm -rf bin results
+	rm -rf bin results data.bin
