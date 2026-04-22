@@ -1,64 +1,137 @@
 name: CI
 
 on:
-  push:
-    branches: [ "master" ]
-    paths-ignore:
-      - 'RESULTS.md'
-      - 'results/**'
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      bench:
+        description: "Benchmark subset to run"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - bigint
+          - float
+          - matrix
+          - sort
+      profile:
+        description: "Benchmark profile"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - full
+          - smoke
+      runs:
+        description: "Measured runs per benchmark"
+        required: true
+        default: "5"
+        type: string
+      warmup:
+        description: "Warmup runs per benchmark"
+        required: true
+        default: "1"
+        type: string
+      publish_results:
+        description: "Commit refreshed RESULTS.md/results back to the branch"
+        required: true
+        default: true
+        type: boolean
+  push:
+    tags:
+      - "bench-*"
 
-# Разрешаем workflow пушить изменения в репозиторий
 permissions:
   contents: write
 
 jobs:
-  benchmark:
+  verify:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Настройка Docker Buildx для продвинутого кэширования
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    # Сборка образа с использованием кэша GitHub Actions
-    # --load загружает образ в локальный докер, чтобы его можно было использовать в 'docker run'
-    - name: Build Docker Image with Cache
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        load: true
-        tags: polyglot-bench:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Build Docker image with cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: polyglot-bench:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-    # Запуск верификации (тесты корректности)
-    - name: Run Verification
-      run: |
-        make docker_test
+      - name: Run verification
+        run: make docker_test DATA_SEED=1337
 
-    # Запуск бенчмарков (генерирует файлы)
-    - name: Run Benchmarks
-      run: |
-        make docker_run
+      - name: Run smoke benchmark
+        run: make docker_smoke DATA_SEED=1337
 
-    # Коммит результатов обратно в репозиторий
-    - name: Commit and Push Results
-      if: github.event_name == 'push'  # Только для пушей, не для PR
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # Проверяем, есть ли изменения в результатах
-        if [[ -n $(git status --porcelain results/ RESULTS.md) ]]; then
-          echo "Changes detected in benchmark results. Committing..."
-          git add RESULTS.md results/
-          git commit -m "Update benchmark results [skip ci]"
-          git push
-        else
-          echo "No changes in benchmark results."
-        fi
+      - name: Upload smoke artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-results
+          path: results/smoke/
+
+  benchmark:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image with cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: polyglot-bench:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resolve benchmark settings
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "RUNNER_ARGS=--bench ${{ inputs.bench }} --profile ${{ inputs.profile }} --runs ${{ inputs.runs }} --warmup ${{ inputs.warmup }}" >> "$GITHUB_ENV"
+            echo "PUBLISH_RESULTS=${{ inputs.publish_results }}" >> "$GITHUB_ENV"
+          else
+            echo "RUNNER_ARGS=--bench all --profile full --runs 5 --warmup 1" >> "$GITHUB_ENV"
+            echo "PUBLISH_RESULTS=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Run benchmarks
+        run: make docker_run DATA_SEED=1337 RUNNER_ARGS="$RUNNER_ARGS"
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: |
+            RESULTS.md
+            results/
+
+      - name: Commit refreshed benchmark results
+        if: github.event_name == 'workflow_dispatch' && github.ref_type == 'branch' && env.PUBLISH_RESULTS == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [[ -n $(git status --porcelain RESULTS.md results/) ]]; then
+            git add RESULTS.md results/
+            git commit -m "Update benchmark results [skip ci]"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          else
+            echo "No benchmark result changes detected."
+          fi

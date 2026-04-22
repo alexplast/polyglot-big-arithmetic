@@ -39,6 +39,7 @@ def verify():
     true_val = str(calculate_factorial(count))
     
     languages = [
+        {"name": "C",          "cmd": "./bin/fact/factorial_c",       "is_fixed": False},
         {"name": "C++",        "cmd": "./bin/fact/factorial_cpp",     "is_fixed": False},
         {"name": "C++ (GMP)",  "cmd": "./bin/fact/factorial_cpp_gmp", "is_fixed": False},
         {"name": "Go",         "cmd": "./bin/fact/factorial_go",      "is_fixed": False},

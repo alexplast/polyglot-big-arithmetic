@@ -41,6 +41,7 @@ def verify():
     true_val = str(calculate_fibonacci(count))
     
     languages = [
+        {"name": "C",          "cmd": "./bin/fibo/fibonacci_c"},
         {"name": "C++",        "cmd": "./bin/fibo/fibonacci_cpp"},
         {"name": "C++ (GMP)",  "cmd": "./bin/fibo/fibonacci_cpp_gmp"},
         {"name": "Go",         "cmd": "./bin/fibo/fibonacci_go"},
