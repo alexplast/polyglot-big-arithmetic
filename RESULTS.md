@@ -1,14 +1,14 @@
 # Polyglot Benchmark Results
 
-Generated on: 2026-04-22 23:50:09
+Generated on: 2026-04-23 00:05:02
 
 ## Environment & Run Settings
 
-- Generated on: 2026-04-22 23:50:09
-- Git: branch `master`, commit `b64c5f6`
-- Host: Linux-6.8.0-100-generic-x86_64-with-glibc2.39
-- CPU: Intel(R) Core(TM) i5-4250U CPU @ 1.30GHz
-- Memory: 2013296 kB
+- Generated on: 2026-04-23 00:05:02
+- Git: branch `master`, commit `1e2312a`
+- Host: Linux-6.17.0-1010-azure-x86_64-with-glibc2.39
+- CPU: AMD EPYC 7763 64-Core Processor
+- Memory: 16373464 kB
 - Toolchain: gcc `gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`; g++ `g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`; gfortran `GNU Fortran (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`; rustc `rustc 1.95.0 (59807616e 2026-04-14)`; go `go version go1.23.4 linux/amd64`; javac `javac 21.0.10`; python `Python 3.12.3`; node `v22.22.2`
 - Run config: bench `all`, profile `full`, runs `5`, warmup `1`, data seed `1337`
 - Problem sizes: factorial `5000`, fibonacci `25000`, power `2^20000`, float count `1475`, matrix `200`, sort `3000`
@@ -18,16 +18,16 @@ Generated on: 2026-04-22 23:50:09
 
 | Language | Factorial | Rel Speed | Fibonacci | Power | Type |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **C++ (GMP)** | 2.701 ms | 1.00x | 11.018 ms | 0.025 ms | GMP Lib |
-| **Rust (Lib)** | 5.733 ms | 2.12x | 17.890 ms | 0.018 ms | num-bigint |
-| **Python** | 9.474 ms | 3.51x | 12.171 ms | 0.081 ms | Native |
-| **Go** | 10.333 ms | 3.83x | 49.517 ms | 0.403 ms | math/big |
-| **JavaScript** | 13.014 ms | 4.82x | 17.242 ms | 0.288 ms | BigInt |
-| **C++** | 16.519 ms | 6.12x | 40.305 ms | 2.194 ms | Custom Base 10^9 |
-| **Fortran** | 16.593 ms | 6.14x | 38.912 ms | 2.495 ms | Custom Base 10^9 |
-| **C** | 16.733 ms | 6.20x | 81.723 ms | 2.631 ms | Custom Base 10^9 |
-| **Rust** | 18.223 ms | 6.75x | 44.781 ms | 2.160 ms | Custom Base 10^9 |
-| **Java** | 65.585 ms | 24.28x | 89.219 ms | 0.034 ms | BigInteger |
+| **Rust (Lib)** | 1.635 ms | 1.00x | 3.618 ms | 0.006 ms | num-bigint |
+| **C++ (GMP)** | 1.681 ms | 1.03x | 3.543 ms | 0.006 ms | GMP Lib |
+| **Go** | 1.812 ms | 1.11x | 6.990 ms | 0.017 ms | math/big |
+| **Python** | 4.275 ms | 2.61x | 6.169 ms | 0.034 ms | Native |
+| **JavaScript** | 5.689 ms | 3.48x | 6.929 ms | 0.084 ms | BigInt |
+| **C** | 9.256 ms | 5.66x | 43.537 ms | 1.422 ms | Custom Base 10^9 |
+| **Fortran** | 9.299 ms | 5.69x | 17.539 ms | 1.078 ms | Custom Base 10^9 |
+| **C++** | 9.323 ms | 5.70x | 21.123 ms | 1.061 ms | Custom Base 10^9 |
+| **Rust** | 9.340 ms | 5.71x | 27.796 ms | 1.202 ms | Custom Base 10^9 |
+| **Java** | 18.162 ms | 11.11x | 17.517 ms | 0.017 ms | BigInteger |
 
 
 ![BigInt Performance Graph](results/plots/bigint.png)
@@ -38,14 +38,14 @@ Generated on: 2026-04-22 23:50:09
 
 | Language | Time | Rel Speed |
 | :--- | :--- | :--- |
-| **Fortran** | 381.286 ms | 1.00x |
-| **Rust** | 445.979 ms | 1.17x |
-| **Java** | 455.496 ms | 1.19x |
-| **JavaScript** | 466.383 ms | 1.22x |
-| **C** | 471.239 ms | 1.24x |
-| **Go** | 472.000 ms | 1.24x |
-| **C++** | 473.841 ms | 1.24x |
-| **Python** | 15577.582 ms | 40.86x |
+| **Rust** | 264.280 ms | 1.00x |
+| **Java** | 267.710 ms | 1.01x |
+| **Fortran** | 269.594 ms | 1.02x |
+| **C** | 269.811 ms | 1.02x |
+| **C++** | 269.877 ms | 1.02x |
+| **Go** | 273.000 ms | 1.03x |
+| **JavaScript** | 277.404 ms | 1.05x |
+| **Python** | 10216.547 ms | 38.66x |
 
 
 ![Float Throughput Graph](results/plots/float.png)
@@ -56,15 +56,15 @@ Generated on: 2026-04-22 23:50:09
 
 | Language | Time | Rel Speed |
 | :--- | :--- | :--- |
-| **Assembler** | 3.806 ms | 1.00x |
-| **C** | 4.684 ms | 1.23x |
-| **Fortran** | 5.511 ms | 1.45x |
-| **C++** | 5.912 ms | 1.55x |
-| **Rust** | 8.753 ms | 2.30x |
-| **Java** | 35.143 ms | 9.23x |
-| **Go** | 39.205 ms | 10.30x |
-| **JavaScript** | 71.110 ms | 18.68x |
-| **Python** | 1932.223 ms | 507.68x |
+| **Assembler** | 1.176 ms | 1.00x |
+| **Fortran** | 1.504 ms | 1.28x |
+| **C** | 1.728 ms | 1.47x |
+| **Rust** | 1.925 ms | 1.64x |
+| **C++** | 2.612 ms | 2.22x |
+| **Go** | 7.222 ms | 6.14x |
+| **Java** | 11.296 ms | 9.61x |
+| **JavaScript** | 16.967 ms | 14.43x |
+| **Python** | 598.606 ms | 509.02x |
 
 
 ![Matrix Multiplication Graph](results/plots/matrix.png)
@@ -75,15 +75,15 @@ Generated on: 2026-04-22 23:50:09
 
 | Language | Time | Rel Speed |
 | :--- | :--- | :--- |
-| **Go** | 17.418 ms | 1.00x |
-| **Rust** | 19.314 ms | 1.11x |
-| **Assembler** | 29.332 ms | 1.68x |
-| **Fortran** | 30.162 ms | 1.73x |
-| **C++** | 30.855 ms | 1.77x |
-| **JavaScript** | 36.719 ms | 2.11x |
-| **Java** | 45.723 ms | 2.63x |
-| **C** | 84.064 ms | 4.83x |
-| **Python** | 973.823 ms | 55.91x |
+| **Assembler** | 5.597 ms | 1.00x |
+| **Rust** | 5.706 ms | 1.02x |
+| **Go** | 6.292 ms | 1.12x |
+| **JavaScript** | 12.314 ms | 2.20x |
+| **Java** | 13.469 ms | 2.41x |
+| **C++** | 20.209 ms | 3.61x |
+| **Fortran** | 20.267 ms | 3.62x |
+| **C** | 20.287 ms | 3.62x |
+| **Python** | 342.244 ms | 61.15x |
 
 
 ![Bubble Sort Graph](results/plots/sort.png)
