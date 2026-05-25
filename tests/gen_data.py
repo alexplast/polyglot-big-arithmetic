@@ -6,12 +6,12 @@ import os
 
 DEFAULT_SIZE = 10000
 OUTPUT_FILE = "data.bin"
+DEFAULT_SEED = 1337
 
-def generate_data(size, filename):
-    print(f"Generating {size} random doubles...")
-    
-    # Fixed seed for absolute reproducibility across runs
-    random.seed(42)
+def generate_data(size, filename, seed):
+    print(f"Generating {size} random doubles with seed {seed}...")
+
+    random.seed(seed)
     
     with open(filename, "wb") as f:
         for _ in range(size):
@@ -26,9 +26,10 @@ def main():
     parser = argparse.ArgumentParser(description="Generate binary data for sort benchmark")
     parser.add_argument("--size", type=int, default=DEFAULT_SIZE, help="Number of doubles to generate")
     parser.add_argument("--out", type=str, default=OUTPUT_FILE, help="Output filename")
+    parser.add_argument("--seed", type=int, default=DEFAULT_SEED, help="Seed for deterministic data generation")
     
     args = parser.parse_args()
-    generate_data(args.size, args.out)
+    generate_data(args.size, args.out, args.seed)
 
 if __name__ == "__main__":
     main()

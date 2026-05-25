@@ -1,114 +1,144 @@
 #!/usr/bin/env python3
-import os
+import argparse
 import csv
+import os
 import sys
 
 try:
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
 except ImportError:
-    print("[ERROR] matplotlib not found. Please run: pip install matplotlib")
-    sys.exit(0)
-
-RESULTS_DIR = "results"
-PLOTS_DIR = os.path.join(RESULTS_DIR, "plots")
+    print("[ERROR] matplotlib not found. Install it locally or run with --no-plots.")
+    sys.exit(1)
 
 COLORS = {
-    'Assembler': '#2c3e50', 'C': '#555555', 'C++': '#00599C',
-    'Rust': '#dea584', 'Go': '#00add8', 'Java': '#b07219',
-    'JavaScript':'#f1e05a', 'Fortran': '#734f96', 'Python': '#3572A5',
+    "Assembler": "#2c3e50",
+    "C": "#555555",
+    "C++": "#00599C",
+    "Rust": "#dea584",
+    "Go": "#00add8",
+    "Java": "#b07219",
+    "JavaScript": "#f1e05a",
+    "Fortran": "#734f96",
+    "Python": "#3572A5",
 }
 
-def load_data(filename):
-    path = os.path.join(RESULTS_DIR, filename)
-    if not os.path.exists(path): return []
-    data = []
-    with open(path, 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader: data.append(row)
-    return data
 
-def save_plot(filename):
-    os.makedirs(PLOTS_DIR, exist_ok=True)
-    path = os.path.join(PLOTS_DIR, filename)
-    # Use bbox_inches='tight' instead of tight_layout to handle labels safely
-    plt.savefig(path, dpi=100, bbox_inches='tight')
+def load_data(results_dir, filename):
+    path = os.path.join(results_dir, filename)
+    if not os.path.exists(path):
+        return []
+
+    with open(path, "r", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def save_plot(plots_dir, filename):
+    os.makedirs(plots_dir, exist_ok=True)
+    path = os.path.join(plots_dir, filename)
+    plt.savefig(path, dpi=100, bbox_inches="tight")
     print(f"Generated plot: {path}")
     plt.close()
 
-def plot_horizontal(title, languages, times, filename, x_label="Time (ms)", log_scale=False):
-    # 1. Filter out skipped tests (Time == 0) to avoid Log(0) errors and empty bars
-    valid_data = [(l, t) for l, t in zip(languages, times) if t > 0]
-    
+
+def plot_horizontal(title, languages, times, plots_dir, filename, x_label="Time (ms)", log_scale=False):
+    valid_data = [(language, value) for language, value in zip(languages, times) if value > 0]
     if not valid_data:
         print(f"[WARN] No valid data to plot for {title}")
         return
 
-    # Sort by time (slowest on top, fastest on bottom usually, but here we reverse to put fastest on top if desired? 
-    # Actually standard is usually: Longest bars on top or bottom. 
-    # Let's keep logic: Sorted by time descending (Slowest at top, Fastest at bottom)
-    paired = sorted(valid_data, key=lambda x: x[1], reverse=True)
-    langs = [p[0] for p in paired]
-    vals = [p[1] for p in paired]
-    colors = [COLORS.get(l, '#999999') for l in langs]
-    
+    paired = sorted(valid_data, key=lambda item: item[1], reverse=True)
+    langs = [item[0] for item in paired]
+    values = [item[1] for item in paired]
+    colors = [COLORS.get(language, "#999999") for language in langs]
+
     plt.figure(figsize=(10, 6))
-    
-    bars = plt.barh(langs, vals, color=colors, height=0.6, zorder=3)
-    
+    bars = plt.barh(langs, values, color=colors, height=0.6, zorder=3)
     plt.title(title, fontsize=14, pad=15)
     plt.xlabel(x_label, fontsize=11)
-    plt.grid(axis='x', linestyle='--', alpha=0.5, zorder=0)
-    
+    plt.grid(axis="x", linestyle="--", alpha=0.5, zorder=0)
+
     if log_scale:
-        plt.xscale('log')
+        plt.xscale("log")
         plt.gca().xaxis.set_major_formatter(ticker.ScalarFormatter())
         plt.gca().xaxis.set_minor_formatter(ticker.NullFormatter())
 
-    # Add text labels
+    max_value = max(values)
     for bar in bars:
         width = bar.get_width()
-        # For log scale, placing text is tricky if the bar is very short, but standard logic works okay usually
-        x_pos = width * 1.05 if log_scale else width + (max(vals) * 0.01)
-        plt.text(x_pos, bar.get_y() + bar.get_height()/2, 
-                 f"{width:.1f} ms", va='center', fontsize=9, fontweight='bold')
+        x_pos = width * 1.05 if log_scale else width + (max_value * 0.01)
+        plt.text(
+            x_pos,
+            bar.get_y() + bar.get_height() / 2,
+            f"{width:.1f} ms",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+        )
 
-    # Set limits
-    if not log_scale: 
-        plt.xlim(0, max(vals) * 1.15)
-    else: 
-        # For log scale, ensure left limit is not 0 (matplotlib handles this, but good to be safe)
-        plt.xlim(right=max(vals) * 3)
+    if not log_scale:
+        plt.xlim(0, max_value * 1.15)
+    else:
+        plt.xlim(right=max_value * 3)
 
-    save_plot(filename)
+    save_plot(plots_dir, filename)
 
-def run_plotting():
-    data = load_data("bigint_benchmark.csv")
+
+def run_plotting(results_dir):
+    plots_dir = os.path.join(results_dir, "plots")
+
+    data = load_data(results_dir, "bigint_benchmark.csv")
     if data:
-        plot_horizontal("BigInt: Factorial Calc (Lower is Better)", 
-                        [d['Language'] for d in data], 
-                        [float(d['Factorial Time (ms)']) for d in data], "bigint.png")
+        plot_horizontal(
+            "BigInt: Factorial Calc (Lower is Better)",
+            [row["Language"] for row in data],
+            [float(row["Factorial Time (ms)"]) for row in data],
+            plots_dir,
+            "bigint.png",
+        )
 
-    data = load_data("float_benchmark.csv")
+    data = load_data(results_dir, "float_benchmark.csv")
     if data:
-        key = [k for k in data[0].keys() if 'Float Time' in k][0]
-        plot_horizontal("Float Math Throughput (Lower is Better)", 
-                        [d['Language'] for d in data], 
-                        [float(d[key]) for d in data], "float.png")
+        key = [column for column in data[0].keys() if "Float Time" in column][0]
+        plot_horizontal(
+            "Float Math Throughput (Lower is Better)",
+            [row["Language"] for row in data],
+            [float(row[key]) for row in data],
+            plots_dir,
+            "float.png",
+        )
 
-    data = load_data("matrix_benchmark.csv")
+    data = load_data(results_dir, "matrix_benchmark.csv")
     if data:
-        key = [k for k in data[0].keys() if 'Time' in k][0]
-        plot_horizontal("Matrix Multiplication (Lower is Better)", 
-                        [d['Language'] for d in data], 
-                        [float(d[key]) for d in data], "matrix.png", log_scale=True)
+        key = [column for column in data[0].keys() if column.endswith("Time (ms)")][0]
+        plot_horizontal(
+            "Matrix Multiplication (Lower is Better)",
+            [row["Language"] for row in data],
+            [float(row[key]) for row in data],
+            plots_dir,
+            "matrix.png",
+            log_scale=True,
+        )
 
-    data = load_data("sort_benchmark.csv")
+    data = load_data(results_dir, "sort_benchmark.csv")
     if data:
-        key = [k for k in data[0].keys() if 'Time' in k][0]
-        plot_horizontal("Bubble Sort (Lower is Better)", 
-                        [d['Language'] for d in data], 
-                        [float(d[key]) for d in data], "sort.png", log_scale=True)
+        key = [column for column in data[0].keys() if column.endswith("Time (ms)")][0]
+        plot_horizontal(
+            "Bubble Sort (Lower is Better)",
+            [row["Language"] for row in data],
+            [float(row[key]) for row in data],
+            plots_dir,
+            "sort.png",
+            log_scale=True,
+        )
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--results-dir", default="results")
+    args = parser.parse_args()
+    run_plotting(args.results_dir)
+
 
 if __name__ == "__main__":
-    run_plotting()
+    main()

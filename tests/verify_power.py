@@ -42,6 +42,7 @@ def verify():
     true_val = str(calculate_power(base, exp))
     
     languages = [
+        {"name": "C",          "cmd": "./bin/power/power_c"},
         {"name": "C++",        "cmd": "./bin/power/power_cpp"},
         {"name": "C++ (GMP)",  "cmd": "./bin/power/power_cpp_gmp"},
         {"name": "Go",         "cmd": "./bin/power/power_go"},
