@@ -1,5 +1,8 @@
     .intel_syntax noprefix
 
+    # Disable executable stack warning
+    .section .note.GNU-stack,"",@progbits
+
     # Note: GNU-stack and Linux-specific sections will fail on macOS.
     # This source is kept for Linux/Docker runs.
 

@@ -1,5 +1,4 @@
 use num_bigint::BigInt;
-use num_traits::ToPrimitive;
 use std::env;
 use std::time::Instant;
 

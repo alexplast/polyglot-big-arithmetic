@@ -78,11 +78,37 @@ def command_label(cmd):
         return cmd
     if not parts:
         return cmd
-    if parts[0] == "java" and parts[-1]:
-        return parts[-1]
-    if parts[0] in ("python", "python3", "node") and len(parts) > 1:
-        return os.path.basename(parts[1])
-    return os.path.basename(parts[0])
+    
+    # Determine language based on command prefix or file extension
+    lang = "Unknown"
+    if parts[0] == "java":
+        lang = "Java"
+    elif parts[0] in ("python", "python3"):
+        lang = "Python"
+    elif parts[0] == "node":
+        lang = "JavaScript"
+    elif "rustc" in parts[0] or "cargo" in parts[0]:
+        lang = "Rust"
+    elif "gfortran" in parts[0]:
+        lang = "Fortran"
+    elif "gcc" in parts[0]:
+        lang = "C"
+    elif "g++" in parts[0]:
+        lang = "C++"
+    elif "bin/" in cmd:
+        # Fallback for precompiled binaries: extract folder as language
+        match = re.search(r"bin/([^/]+)/", cmd)
+        if match:
+            lang = match.group(1).capitalize()
+
+    # Extract task name (e.g., 'fibonacci', 'factorial')
+    task = "Task"
+    for part in parts:
+        if any(x in part for x in ("fibo", "fact", "power", "matrix", "bubble")):
+            task = part.split('/')[-1].split('_')[0].capitalize()
+            break
+
+    return f"{lang}: {task}"
 
 
 def run_once(cmd, env_vars):
